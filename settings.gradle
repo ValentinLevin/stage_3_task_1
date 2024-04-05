@@ -1,5 +1,3 @@
 rootProject.name="news-management"
-include "module-main"
+
 include "module-repository"
-include "module-service"
-include "module-web"
