@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class Model {
+public abstract class Model implements Cloneable {
     private Long id;
 
     public Model() {}
@@ -17,5 +17,10 @@ public abstract class Model {
             @JsonProperty("id") Long id
     ) {
         this.id = id;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        throw new CloneNotSupportedException();
     }
 }

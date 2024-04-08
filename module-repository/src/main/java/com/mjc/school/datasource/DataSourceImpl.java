@@ -1,33 +1,34 @@
 package com.mjc.school.datasource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mjc.school.exception.DataFileNotFoundException;
 import com.mjc.school.exception.DataFileReadException;
-import com.mjc.school.model.Author;
+import com.mjc.school.exception.EntityIsNotCloneableException;
 import com.mjc.school.model.Model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 public class DataSourceImpl<T extends Model> implements DataSource<T> {
+    private final Class<T> entityClass;
     private final Map<Long, T> values = new HashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private long nextId = 1;
 
-    protected DataSourceImpl(String dataFileName, Class<T> modelClass) {
-        List<T> items = readDataFromFile(dataFileName, modelClass);
-        indexData(items);
+    protected DataSourceImpl(String dataFileName, Class<T> entityClass) {
+        this.entityClass = entityClass;
+        List<T> items = readDataFromFile(dataFileName, entityClass);
+        indexItems(items);
     }
 
-    private void indexData(List<T> items) {
+    private void indexItems(List<T> items) {
         for (T item: items) {
             this.values.put(item.getId(), item);
             if (item.getId() >= nextId) {
@@ -55,31 +56,50 @@ public class DataSourceImpl<T extends Model> implements DataSource<T> {
     public T findById(Long id) {
         lock.readLock().lock();
         try {
-            return this.values.get(id);
+            T entity = this.values.get(id);
+            return entity == null ? null : cloneEntity(entity);
         } finally {
             lock.readLock().unlock();
         }
     }
 
     @Override
-    public void save(T value) {
-        if (value.getId() == 0) {
-            value.setId(getNextId());
-        }
-
-        lock.writeLock().lock();
+    public List<T> findAll() {
+        lock.readLock().lock();
         try {
-            this.values.put(value.getId(), value);
+            return this.values.values().stream()
+                            .map(this::cloneEntity)
+                            .collect(Collectors.toList());
         } finally {
-            lock.writeLock().unlock();
+            lock.readLock().unlock();
         }
     }
 
     @Override
-    public void remove(Long id) {
+    public T save(T value) {
+        T entityToSave = cloneEntity(value);
+
+        if (entityToSave.getId() == 0) {
+            entityToSave.setId(getNextId());
+        } else if (entityToSave.getId() >= this.nextId) {
+            this.nextId = entityToSave.getId() + 1;
+        }
+
         lock.writeLock().lock();
         try {
-            this.values.remove(id);
+            this.values.put(entityToSave.getId(), entityToSave);
+        } finally {
+            lock.writeLock().unlock();
+        }
+
+        return entityToSave;
+    }
+
+    @Override
+    public T remove(Long id) {
+        lock.writeLock().lock();
+        try {
+            return this.values.remove(id);
         } finally {
             lock.writeLock().unlock();
         }
@@ -87,10 +107,23 @@ public class DataSourceImpl<T extends Model> implements DataSource<T> {
 
     @Override
     public long count() {
-        return this.values.size();
+        lock.readLock().lock();
+        try {
+            return this.values.size();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     private synchronized Long getNextId() {
         return this.nextId++;
+    }
+
+    private T cloneEntity(T entity) {
+        try {
+            return (T) entity.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new EntityIsNotCloneableException(this.entityClass.getCanonicalName());
+        }
     }
 }

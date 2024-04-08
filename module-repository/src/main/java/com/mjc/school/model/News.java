@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -25,6 +26,18 @@ public class News extends Model {
         this.createDate = LocalDateTime.now();
     }
 
+    @Override
+    public Object clone() {
+        return new News(
+                this.getId(),
+                this.getTitle(),
+                this.getContent(),
+                this.getCreateDate(),
+                this.getLastUpdateDate(),
+                this.getAuthorId()
+        );
+    }
+
     @JsonCreator()
     public News(
             @JsonProperty("id") Long id,
@@ -40,5 +53,35 @@ public class News extends Model {
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
         this.authorId = getAuthorId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                this.getId(),
+                title,
+                content,createDate,
+                lastUpdateDate,
+                authorId
+        );
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof News)) {
+            return false;
+        }
+
+        News n = (News) obj;
+        return Objects.equals(this.getId(), n.getId())
+                && Objects.equals(this.getTitle(), n.getTitle())
+                && Objects.equals(this.getContent(), n.getContent())
+                && Objects.equals(this.getCreateDate(), n.getCreateDate())
+                && Objects.equals(this.getLastUpdateDate(), n.getLastUpdateDate())
+                && Objects.equals(this.getAuthorId(), n.getAuthorId());
     }
 }
