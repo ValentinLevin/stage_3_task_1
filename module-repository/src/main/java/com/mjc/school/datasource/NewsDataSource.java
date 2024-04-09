@@ -2,6 +2,8 @@ package com.mjc.school.datasource;
 
 import com.mjc.school.model.News;
 
+import java.time.LocalDateTime;
+
 public class NewsDataSource extends DataSourceImpl<News> implements DataSource<News> {
     private static final String DATA_FILE_NAME = "news.json";
 

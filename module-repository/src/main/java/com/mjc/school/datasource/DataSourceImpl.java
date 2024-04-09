@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mjc.school.exception.DataFileNotFoundException;
 import com.mjc.school.exception.DataFileReadException;
 import com.mjc.school.exception.EntityIsNotCloneableException;
-import com.mjc.school.model.Model;
+import com.mjc.school.model.Entity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,9 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
-public class DataSourceImpl<T extends Model> implements DataSource<T> {
+public class DataSourceImpl<T extends Entity> implements DataSource<T> {
     private final Class<T> entityClass;
     private final Map<Long, T> values = new HashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -37,7 +36,7 @@ public class DataSourceImpl<T extends Model> implements DataSource<T> {
         }
     }
 
-    private List<T> readDataFromFile(String dataFileName, Class<T> modelClass)  {
+    private List<T> readDataFromFile(String dataFileName, Class<T> entityClass)  {
         ClassLoader classLoader = AuthorDataSource.class.getClassLoader();
         try (InputStream is = classLoader.getResourceAsStream(dataFileName)) {
             if (is == null) {
@@ -45,7 +44,7 @@ public class DataSourceImpl<T extends Model> implements DataSource<T> {
             }
 
             ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
-            JavaType mapperType = mapper.getTypeFactory().constructCollectionType(List.class, modelClass);
+            JavaType mapperType = mapper.getTypeFactory().constructCollectionType(List.class, entityClass);
             return mapper.readValue(is, mapperType);
         } catch (IOException e) {
             throw new DataFileReadException(dataFileName, e);
@@ -69,7 +68,7 @@ public class DataSourceImpl<T extends Model> implements DataSource<T> {
         try {
             return this.values.values().stream()
                             .map(this::cloneEntity)
-                            .collect(Collectors.toList());
+                            .toList();
         } finally {
             lock.readLock().unlock();
         }

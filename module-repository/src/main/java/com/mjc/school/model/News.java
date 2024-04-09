@@ -3,28 +3,26 @@ package com.mjc.school.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
 @Setter
-public class News extends Model {
+@ToString
+public class News extends Entity {
     private String title;
     private String content;
 
-    @Setter(AccessLevel.NONE)
     private LocalDateTime createDate;
 
     private LocalDateTime lastUpdateDate;
     private Long authorId;
 
-    public News() {
-        this.createDate = LocalDateTime.now();
-    }
+    public News() { }
 
     @Override
     public Object clone() {
@@ -52,7 +50,7 @@ public class News extends Model {
         this.content = content;
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
-        this.authorId = getAuthorId();
+        this.authorId = authorId;
     }
 
     @Override
@@ -60,7 +58,8 @@ public class News extends Model {
         return Objects.hash(
                 this.getId(),
                 title,
-                content,createDate,
+                content,
+                createDate,
                 lastUpdateDate,
                 authorId
         );
@@ -72,11 +71,10 @@ public class News extends Model {
             return true;
         }
 
-        if (!(obj instanceof News)) {
+        if (!(obj instanceof News n)) {
             return false;
         }
 
-        News n = (News) obj;
         return Objects.equals(this.getId(), n.getId())
                 && Objects.equals(this.getTitle(), n.getTitle())
                 && Objects.equals(this.getContent(), n.getContent())

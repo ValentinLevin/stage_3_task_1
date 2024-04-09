@@ -7,13 +7,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class Model implements Cloneable {
+public abstract class Entity implements Cloneable {
     private Long id;
 
-    public Model() {}
+    protected Entity() {}
 
     @JsonCreator()
-    public Model(
+    protected Entity(
             @JsonProperty("id") Long id
     ) {
         this.id = id;

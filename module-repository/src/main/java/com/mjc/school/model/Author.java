@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Objects;
 
 @Getter
 @Setter
-public class Author extends Model {
+@ToString
+public class Author extends Entity {
     private String name;
 
     public Author() {
@@ -36,11 +38,10 @@ public class Author extends Model {
             return true;
         }
 
-        if (!(obj instanceof Author)) {
+        if (!(obj instanceof Author a)) {
             return false;
         }
 
-        Author a = (Author) obj;
         return Objects.equals(this.getId(), a.getId())
                 && Objects.equals(this.getName(), a.getName());
     }
