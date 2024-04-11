@@ -9,6 +9,8 @@ import com.mjc.school.model.News;
 
 public class RepositoryFactory {
 
+    private RepositoryFactory() {}
+
     public static <T extends Entity> Repository<T> getRepository(Class<T> entityClass) {
         if (entityClass == Author.class) {
             DataSource<Author> dataSource = DataSourceFactory.getDataSource(Author.class);

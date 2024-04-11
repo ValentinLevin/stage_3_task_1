@@ -2,9 +2,7 @@ package com.mjc.school.datasource;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mjc.school.exception.DataFileNotFoundException;
-import com.mjc.school.exception.DataFileReadException;
-import com.mjc.school.exception.EntityIsNotCloneableException;
+import com.mjc.school.exception.*;
 import com.mjc.school.model.Entity;
 
 import java.io.IOException;
@@ -12,14 +10,15 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DataSourceImpl<T extends Entity> implements DataSource<T> {
     private final Class<T> entityClass;
     private final Map<Long, T> values = new HashMap<>();
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private long nextId = 1;
+    private final ReadWriteLock entityLock = new ReentrantReadWriteLock();
+    private final AtomicLong nextId = new AtomicLong(1L);
 
     protected DataSourceImpl(String dataFileName, Class<T> entityClass) {
         this.entityClass = entityClass;
@@ -28,15 +27,20 @@ public class DataSourceImpl<T extends Entity> implements DataSource<T> {
     }
 
     private void indexItems(List<T> items) {
-        for (T item: items) {
-            this.values.put(item.getId(), item);
-            if (item.getId() >= nextId) {
-                nextId = item.getId() + 1;
+        entityLock.writeLock().lock();
+        try {
+            for (T item: items) {
+                this.values.put(item.getId(), item);
+                if (item.getId() >= nextId.get()) {
+                    setNextId(item.getId() + 1);
+                }
             }
+        } finally {
+            entityLock.writeLock().unlock();
         }
     }
 
-    private List<T> readDataFromFile(String dataFileName, Class<T> entityClass)  {
+    private List<T> readDataFromFile(String dataFileName, Class<T> entityClass) {
         ClassLoader classLoader = AuthorDataSource.class.getClassLoader();
         try (InputStream is = classLoader.getResourceAsStream(dataFileName)) {
             if (is == null) {
@@ -53,69 +57,85 @@ public class DataSourceImpl<T extends Entity> implements DataSource<T> {
 
     @Override
     public T findById(Long id) {
-        lock.readLock().lock();
+        if (id == null) {
+            throw new KeyNullReferenceException();
+        }
+
+        entityLock.readLock().lock();
         try {
             T entity = this.values.get(id);
             return entity == null ? null : cloneEntity(entity);
         } finally {
-            lock.readLock().unlock();
+            entityLock.readLock().unlock();
         }
     }
 
     @Override
     public List<T> findAll() {
-        lock.readLock().lock();
+        entityLock.readLock().lock();
         try {
             return this.values.values().stream()
-                            .map(this::cloneEntity)
-                            .toList();
+                    .map(this::cloneEntity)
+                    .toList();
         } finally {
-            lock.readLock().unlock();
+            entityLock.readLock().unlock();
         }
     }
 
     @Override
     public T save(T value) {
-        T entityToSave = cloneEntity(value);
-
-        if (entityToSave.getId() == 0) {
-            entityToSave.setId(getNextId());
-        } else if (entityToSave.getId() >= this.nextId) {
-            this.nextId = entityToSave.getId() + 1;
+        if (value == null) {
+            throw new EntityNullReferenceException();
         }
 
-        lock.writeLock().lock();
+        if (value.getId() == null || value.getId() == 0) {
+            value.setId(getNextId());
+        } else if (value.getId() >= this.nextId.get()) {
+            setNextId(value.getId() + 1);
+        }
+
+        T entityToSave = cloneEntity(value);
+
+        entityLock.writeLock().lock();
         try {
             this.values.put(entityToSave.getId(), entityToSave);
         } finally {
-            lock.writeLock().unlock();
+            entityLock.writeLock().unlock();
         }
 
-        return entityToSave;
+        return value;
     }
 
     @Override
-    public T remove(Long id) {
-        lock.writeLock().lock();
+    public T delete(Long id) {
+        if (id == null) {
+            throw new KeyNullReferenceException();
+        }
+
+        entityLock.writeLock().lock();
         try {
             return this.values.remove(id);
         } finally {
-            lock.writeLock().unlock();
+            entityLock.writeLock().unlock();
         }
     }
 
     @Override
     public long count() {
-        lock.readLock().lock();
+        entityLock.readLock().lock();
         try {
             return this.values.size();
         } finally {
-            lock.readLock().unlock();
+            entityLock.readLock().unlock();
         }
     }
 
-    private synchronized Long getNextId() {
-        return this.nextId++;
+    private Long getNextId() {
+        return this.nextId.incrementAndGet();
+    }
+
+    private void setNextId(Long value) {
+        this.nextId.set(value);
     }
 
     private T cloneEntity(T entity) {
