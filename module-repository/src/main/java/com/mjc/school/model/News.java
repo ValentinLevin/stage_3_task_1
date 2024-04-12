@@ -71,9 +71,11 @@ public class News extends Entity {
             return true;
         }
 
-        if (!(obj instanceof News n)) {
+        if (!(obj instanceof News)) {
             return false;
         }
+
+        News n = (News) obj;
 
         return Objects.equals(this.getId(), n.getId())
                 && Objects.equals(this.getTitle(), n.getTitle())

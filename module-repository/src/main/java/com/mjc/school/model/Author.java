@@ -38,9 +38,11 @@ public class Author extends Entity {
             return true;
         }
 
-        if (!(obj instanceof Author a)) {
+        if (!(obj instanceof Author)) {
             return false;
         }
+
+        Author a = (Author) obj;
 
         return Objects.equals(this.getId(), a.getId())
                 && Objects.equals(this.getName(), a.getName());

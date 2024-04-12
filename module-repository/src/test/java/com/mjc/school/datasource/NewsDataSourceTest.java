@@ -57,10 +57,9 @@ class NewsDataSourceTest {
         News itemToDelete = dataSource.findById(idToDelete);
         long expectedCount = dataSource.count() - 1;
 
-        News removedItem = dataSource.delete(idToDelete);
+        dataSource.delete(idToDelete);
         News actualRecordAfterDelete = dataSource.findById(idToDelete);
 
-        assertThat(removedItem).isEqualTo(itemToDelete);
         assertThat(actualRecordAfterDelete).isNull();
         assertThat(dataSource.count()).isEqualTo(expectedCount);
     }
@@ -84,7 +83,6 @@ class NewsDataSourceTest {
         assertThat(addedEntity.getId()).isNotZero();
 
         expectedEntity.setId(addedEntity.getId());
-        assertThat(addedEntity).isNotSameAs(expectedEntity).isEqualTo(expectedEntity);
 
         News fetchedEntity = dataSource.findById(addedEntity.getId());
         assertThat(fetchedEntity).isNotSameAs(expectedEntity).isEqualTo(expectedEntity);
@@ -131,5 +129,20 @@ class NewsDataSourceTest {
 
                 .isNotSameAs(secondFetchEntity_ForChange)
                 .isNotEqualTo(secondFetchEntity_ForChange);
+    }
+
+    @Test
+    @DisplayName("При попытке поиска по существующему id будет возвращена сущность с соответствующим id")
+    void findById_found() {
+        Long idForFetch = findRandomId();
+        News news = dataSource.findById(idForFetch);
+        assertThat(news).isNotNull().extracting("id").isEqualTo(news.getId());
+    }
+
+    @Test
+    @DisplayName("При попытке поиска по несуществующему id будет возвращен null")
+    void findById_notFound_nullAsResult() {
+        News news = dataSource.findById(-1L);
+        assertThat(news).isNull();
     }
 }

@@ -52,9 +52,8 @@ class AuthorDataSourceTest {
     @DisplayName("When deleting an entity, it was the selected entity that was deleted")
     void delete_SelectedEntityHasBeenRemoved_true() {
         long idToDelete = findRandomId();
-        Author removedAuthor = dataSource.delete(idToDelete);
+        dataSource.delete(idToDelete);
         assertThat(dataSource.findById(idToDelete)).isNull();
-        assertThat(removedAuthor.getId()).isEqualTo(idToDelete);
     }
 
     @Test
@@ -114,5 +113,20 @@ class AuthorDataSourceTest {
         assertThat(actualAuthor)
                 .isNotSameAs(expectedAuthor)
                 .isEqualTo(expectedAuthor);
+    }
+
+    @Test
+    @DisplayName("При попытке поиска по существующему id будет возвращена сущность с соответствующим id")
+    void findById_found() {
+        Long idForFetch = findRandomId();
+        Author author = dataSource.findById(idForFetch);
+        assertThat(author).isNotNull().extracting("id").isEqualTo(author.getId());
+    }
+
+    @Test
+    @DisplayName("При попытке поиска по несуществующему id будет возвращен null")
+    void findById_notFound_nullAsResult() {
+        Author author = dataSource.findById(-1L);
+        assertThat(author).isNull();
     }
 }

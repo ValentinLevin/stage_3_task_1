@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 public class DataSourceImpl<T extends Entity> implements DataSource<T> {
     private final Class<T> entityClass;
@@ -76,7 +77,7 @@ public class DataSourceImpl<T extends Entity> implements DataSource<T> {
         try {
             return this.values.values().stream()
                     .map(this::cloneEntity)
-                    .toList();
+                    .collect(Collectors.toList());
         } finally {
             entityLock.readLock().unlock();
         }
@@ -107,14 +108,14 @@ public class DataSourceImpl<T extends Entity> implements DataSource<T> {
     }
 
     @Override
-    public T delete(Long id) {
+    public void delete(Long id) {
         if (id == null) {
             throw new KeyNullReferenceException();
         }
 
         entityLock.writeLock().lock();
         try {
-            return this.values.remove(id);
+            this.values.remove(id);
         } finally {
             entityLock.writeLock().unlock();
         }
