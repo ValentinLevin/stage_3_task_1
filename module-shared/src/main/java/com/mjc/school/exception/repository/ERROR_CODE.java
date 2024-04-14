@@ -1,7 +1,9 @@
-package com.mjc.school.exception;
+package com.mjc.school.exception.repository;
 
 public enum ERROR_CODE {
-    DATA_RILE_NOT_FOUND(1);
+    DATA_FILE_NOT_FOUND(1),
+    ILLEGAL_ARGUMENT_VALUE(2),
+    ENTITY_VALIDATION_FAILED(3);
 
     private final int errorCode;
 

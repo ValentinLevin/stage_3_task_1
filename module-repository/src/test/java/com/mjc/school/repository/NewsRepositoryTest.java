@@ -2,6 +2,7 @@ package com.mjc.school.repository;
 
 import com.mjc.school.datasource.DataSource;
 import com.mjc.school.exception.EntityNullReferenceException;
+import com.mjc.school.exception.EntityValidationException;
 import com.mjc.school.exception.KeyNullReferenceException;
 import com.mjc.school.model.News;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +58,7 @@ class NewsRepositoryTest {
                         LocalDateTime.of(2024, 04, 12, 12, 14, 37),
                         1L
                 );
-        Mockito.doNothing().when(dataSource).delete(1L);
+        Mockito.doReturn(true).when(dataSource).delete(1L);
 
         this.repository.delete(newsForDelete);
 
@@ -87,5 +88,20 @@ class NewsRepositoryTest {
     @DisplayName("When passing null as a key to the key deletion method, a KeyNullReferenceException exception will be thrown")
     void delete_ByNullKey_throwsKeyNullReferenceException() {
         assertThatThrownBy(() -> repository.deleteById(null)).isInstanceOf(KeyNullReferenceException.class);
+    }
+
+    @Test
+    @DisplayName("If the entity field values are incorrect, throw an EntityValidationException")
+    void authorTitleAndContentNotValidated_throwsEntityValidationException() {
+        News news = new News(
+                1L,
+                "12",
+                "123",
+                null,
+                null,
+                null
+        );
+        Mockito.doReturn(news).when(dataSource).save(news);
+        assertThatThrownBy(() -> repository.save(news)).isInstanceOf(EntityValidationException.class);
     }
 }

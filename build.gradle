@@ -39,13 +39,18 @@ subprojects {
         annotationProcessor "org.projectlombok:lombok"
         compileOnly "org.projectlombok:lombok"
 
+        implementation 'org.hibernate.validator:hibernate-validator'
+        annotationProcessor 'org.hibernate.validator:hibernate-validator-annotation-processor'
+
+        implementation 'org.glassfish.expressly:expressly:5.0.0'
+
         testImplementation 'org.junit.jupiter:junit-jupiter'
         testImplementation 'org.assertj:assertj-core'
         testImplementation 'org.mockito:mockito-core'
         testImplementation 'org.mockito:mockito-junit-jupiter'
     }
 
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy {
             failOnVersionConflict()
         }

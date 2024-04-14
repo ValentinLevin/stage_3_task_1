@@ -1,4 +1,4 @@
-package com.mjc.school.exception;
+package com.mjc.school.exception.repository;
 
 import java.io.Serial;
 

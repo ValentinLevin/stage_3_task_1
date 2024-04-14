@@ -2,7 +2,7 @@ package com.mjc.school.datasource;
 
 import com.mjc.school.model.Author;
 
-public class AuthorDataSource extends DataSourceImpl<Author> {
+class AuthorDataSource extends DataSourceImpl<Author> {
     private static final String DATA_FILE_NAME = "author.json";
 
     private AuthorDataSource() {

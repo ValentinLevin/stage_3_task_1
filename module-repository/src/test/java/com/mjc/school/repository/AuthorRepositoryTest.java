@@ -2,6 +2,7 @@ package com.mjc.school.repository;
 
 import com.mjc.school.datasource.DataSource;
 import com.mjc.school.exception.EntityNullReferenceException;
+import com.mjc.school.exception.EntityValidationException;
 import com.mjc.school.exception.KeyNullReferenceException;
 import com.mjc.school.model.Author;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ class AuthorRepositoryTest {
     @DisplayName("When a deletion request is made, the required dataSource method will be called")
     void delete_ByEntity() {
         Author authorForDelete = new Author(1L, "Author 1 name");
-        Mockito.doNothing().when(dataSource).delete(1L);
+        Mockito.doReturn(true).when(dataSource).delete(1L);
 
         this.repository.delete(authorForDelete);
 
@@ -69,5 +70,12 @@ class AuthorRepositoryTest {
     @DisplayName("When passing null as a key to the key deletion method, a KeyNullReferenceException exception will be thrown")
     void delete_ByNullKey_throwsKeyNullReferenceException() {
         assertThatThrownBy(() -> repository.deleteById(null)).isInstanceOf(KeyNullReferenceException.class);
+    }
+
+    @Test
+    void authorNameTooSmall_throwsEntityValidationException() {
+        Author author = new Author(1L, "12");
+        Mockito.doReturn(author).when(dataSource).save(author);
+        assertThatThrownBy(() -> repository.save(author)).isInstanceOf(EntityValidationException.class);
     }
 }

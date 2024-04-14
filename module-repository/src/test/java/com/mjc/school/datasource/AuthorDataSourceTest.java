@@ -116,7 +116,14 @@ class AuthorDataSourceTest {
     }
 
     @Test
-    @DisplayName("При попытке поиска по существующему id будет возвращена сущность с соответствующим id")
+    @DisplayName("If you try to search by a non-existent id, null will be returned")
+    void findById_notFound_nullAsResult() {
+        Author author = dataSource.findById(-1L);
+        assertThat(author).isNull();
+    }
+
+    @Test
+    @DisplayName("If you try to search for an existing id, an entity with the corresponding id will be returned")
     void findById_found() {
         Long idForFetch = findRandomId();
         Author author = dataSource.findById(idForFetch);
@@ -124,9 +131,9 @@ class AuthorDataSourceTest {
     }
 
     @Test
-    @DisplayName("При попытке поиска по несуществующему id будет возвращен null")
-    void findById_notFound_nullAsResult() {
-        Author author = dataSource.findById(-1L);
-        assertThat(author).isNull();
+    @DisplayName("When checking for the presence of an entity by an existing id, it will return true")
+    void existsById_exists_true() {
+        long idForCheck = findRandomId();
+        assertThat(dataSource.existsById(idForCheck)).isTrue();
     }
 }

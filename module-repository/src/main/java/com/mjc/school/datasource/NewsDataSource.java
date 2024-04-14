@@ -2,7 +2,7 @@ package com.mjc.school.datasource;
 
 import com.mjc.school.model.News;
 
-public class NewsDataSource extends DataSourceImpl<News> implements DataSource<News> {
+class NewsDataSource extends DataSourceImpl<News> implements DataSource<News> {
     private static final String DATA_FILE_NAME = "news.json";
 
     private NewsDataSource() {

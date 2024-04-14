@@ -1,0 +1,12 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(":module-shared")
+    implementation project(":module-service")
+}
+
+application {
+    mainClass = "com.mjc.school.App"
+}

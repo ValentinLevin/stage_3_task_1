@@ -3,6 +3,9 @@ package com.mjc.school.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,12 +17,21 @@ import java.util.Objects;
 @Setter
 @ToString
 public class News extends Entity {
+    @NotEmpty(message = "News title is required")
+    @Size(min = 5, message = "The title of the news must be at least 5 characters")
+    @Size(max = 30, message = "The title of the news must be no more than 30 characters")
     private String title;
+
+    @NotEmpty(message = "News content is required")
+    @Size(min = 5, message = "The content of the news must be at least 5 characters")
+    @Size(max = 30, message = "The content of the news must be no more than 255 characters")
     private String content;
 
     private LocalDateTime createDate;
 
     private LocalDateTime lastUpdateDate;
+
+    @NotNull(message = "Author id is required")
     private Long authorId;
 
     public News() { }

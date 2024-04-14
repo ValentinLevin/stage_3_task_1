@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-public class DataSourceImpl<T extends Entity> implements DataSource<T> {
+class DataSourceImpl<T extends Entity> implements DataSource<T> {
     private final Class<T> entityClass;
     private final Map<Long, T> values = new HashMap<>();
     private final ReadWriteLock entityLock = new ReentrantReadWriteLock();
@@ -108,14 +108,14 @@ public class DataSourceImpl<T extends Entity> implements DataSource<T> {
     }
 
     @Override
-    public void delete(Long id) {
+    public boolean delete(Long id) {
         if (id == null) {
             throw new KeyNullReferenceException();
         }
 
         entityLock.writeLock().lock();
         try {
-            this.values.remove(id);
+            return this.values.remove(id) != null;
         } finally {
             entityLock.writeLock().unlock();
         }
@@ -131,6 +131,14 @@ public class DataSourceImpl<T extends Entity> implements DataSource<T> {
         }
     }
 
+    @Override
+    public boolean existsById(Long id) {
+        if (id == null) {
+            throw new KeyNullReferenceException();
+        }
+        return this.values.containsKey(id);
+    }
+
     private Long getNextId() {
         return this.nextId.incrementAndGet();
     }
@@ -143,7 +151,7 @@ public class DataSourceImpl<T extends Entity> implements DataSource<T> {
         try {
             return (T) entity.clone();
         } catch (CloneNotSupportedException e) {
-            throw new EntityIsNotCloneableException(this.entityClass.getCanonicalName());
+            throw new EntityIsNotCloneableException(this.entityClass);
         }
     }
 }

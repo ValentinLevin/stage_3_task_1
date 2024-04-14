@@ -8,6 +8,7 @@ public interface DataSource <T extends Entity> {
     T findById(Long id);
     List<T> findAll();
     T save(T value);
-    void delete(Long id);
+    boolean delete(Long id);
     long count();
+    boolean existsById(Long id);
 }
