@@ -1,0 +1,11 @@
+plugins {
+    id "java-library"
+}
+
+dependencies {
+    implementation project (":module-shared")
+    implementation project (":module-service")
+
+    implementation "com.fasterxml.jackson.core:jackson-databind"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+}

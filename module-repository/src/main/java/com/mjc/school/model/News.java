@@ -24,11 +24,13 @@ public class News extends Entity {
 
     @NotEmpty(message = "News content is required")
     @Size(min = 5, message = "The content of the news must be at least 5 characters")
-    @Size(max = 30, message = "The content of the news must be no more than 255 characters")
+    @Size(max = 255, message = "The content of the news must be no more than 255 characters")
     private String content;
 
+    @NotNull(message = "The date/time the data was created is required.")
     private LocalDateTime createDate;
 
+    @NotNull(message = "The date/time of the last data update is required")
     private LocalDateTime lastUpdateDate;
 
     @NotNull(message = "Author id is required")
@@ -83,17 +85,15 @@ public class News extends Entity {
             return true;
         }
 
-        if (!(obj instanceof News)) {
+        if (!(obj instanceof News other)) {
             return false;
         }
 
-        News n = (News) obj;
-
-        return Objects.equals(this.getId(), n.getId())
-                && Objects.equals(this.getTitle(), n.getTitle())
-                && Objects.equals(this.getContent(), n.getContent())
-                && Objects.equals(this.getCreateDate(), n.getCreateDate())
-                && Objects.equals(this.getLastUpdateDate(), n.getLastUpdateDate())
-                && Objects.equals(this.getAuthorId(), n.getAuthorId());
+        return Objects.equals(this.getId(), other.getId())
+                && Objects.equals(this.getTitle(), other.getTitle())
+                && Objects.equals(this.getContent(), other.getContent())
+                && Objects.equals(this.getCreateDate(), other.getCreateDate())
+                && Objects.equals(this.getLastUpdateDate(), other.getLastUpdateDate())
+                && Objects.equals(this.getAuthorId(), other.getAuthorId());
     }
 }

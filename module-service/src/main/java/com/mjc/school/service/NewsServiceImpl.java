@@ -1,19 +1,35 @@
 package com.mjc.school.service;
 
+import com.mjc.school.dto.EditNewsRequestDTO;
 import com.mjc.school.dto.NewsDTO;
-import com.mjc.school.mapper.AuthorDTOMapper;
-import com.mjc.school.mapper.NewsDTOMapper;
+import com.mjc.school.exception.DTOValidationException;
+import com.mjc.school.exception.EntityNotFoundException;
+import com.mjc.school.mapper.AuthorMapper;
+import com.mjc.school.mapper.NewsMapper;
 import com.mjc.school.model.Author;
 import com.mjc.school.model.News;
 import com.mjc.school.repository.Repository;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 class NewsServiceImpl implements NewsService {
     private final Repository<News> newsRepository;
     private final Repository<Author> authorRepository;
+    private static final Validator validator;
+
+    static {
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
+    }
 
     public NewsServiceImpl(
             Repository<News> newsRepository,
@@ -24,13 +40,47 @@ class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public NewsDTO add(NewsDTO entity) {
-        return null;
+    public NewsDTO add(EditNewsRequestDTO newsDTO) {
+        validateDTO(newsDTO);
+
+        if (!authorRepository.existsById(newsDTO.getAuthorId())) {
+            throw new DTOValidationException(String.format("Not exists author with id %d", newsDTO.getAuthorId()));
+        }
+
+        News news = NewsMapper.fromEditNewsRequestDTO(newsDTO);
+        news.setCreateDate(LocalDateTime.now());
+
+        news = newsRepository.save(news);
+
+        return findById(news.getId());
     }
 
     @Override
-    public NewsDTO update(NewsDTO entity) {
-        return null;
+    public NewsDTO update(Long newsId, EditNewsRequestDTO newsDTO) {
+        if (newsId == null || newsId <= 0) {
+            throw new DTOValidationException(String.format("Incorrect news id value %d", newsId));
+        }
+
+        validateDTO(newsDTO);
+
+        News news = newsRepository.findById(newsId);
+
+        if (news == null) {
+            throw new EntityNotFoundException(newsId, News.class);
+        }
+
+        if (!authorRepository.existsById(newsDTO.getAuthorId())) {
+            throw new EntityNotFoundException(newsDTO.getAuthorId(), Author.class);
+        }
+
+        news.setTitle(newsDTO.getTitle());
+        news.setContent(newsDTO.getContent());
+        news.setAuthorId(newsDTO.getAuthorId());
+        news.setLastUpdateDate(LocalDateTime.now());
+
+        news = newsRepository.save(news);
+
+        return findById(news.getId());
     }
 
     @Override
@@ -39,14 +89,13 @@ class NewsServiceImpl implements NewsService {
         if (news != null) {
             Author author = this.authorRepository.findById(news.getAuthorId());
 
-            NewsDTO newsDTO = NewsDTOMapper.fromNews(news);
-            newsDTO.setAuthor(author != null ? AuthorDTOMapper.fromAuthor(author) : null);
+            NewsDTO newsDTO = NewsMapper.toNewsDTO(news);
+            newsDTO.setAuthor(author != null ? AuthorMapper.toAuthorDTO(author) : null);
 
             return newsDTO;
         } else {
             return null;
         }
-
     }
 
     @Override
@@ -58,8 +107,8 @@ class NewsServiceImpl implements NewsService {
         List<News> news = this.newsRepository.findAll();
         return news.stream()
                 .map(item -> {
-                    NewsDTO newsDTO = NewsDTOMapper.fromNews(item);
-                    newsDTO.setAuthor(AuthorDTOMapper.fromAuthor(authors.get(item.getId())));
+                    NewsDTO newsDTO = NewsMapper.toNewsDTO(item);
+                    newsDTO.setAuthor(AuthorMapper.toAuthorDTO(authors.get(item.getId())));
                     return newsDTO;
                 })
                 .toList();
@@ -68,5 +117,20 @@ class NewsServiceImpl implements NewsService {
     @Override
     public boolean deleteById(long id) {
         return this.newsRepository.deleteById(id);
+    }
+
+    private <T> void validateDTO(T object) {
+        if (object == null) {
+            throw new DTOValidationException("Passed a null object as the object to add");
+        }
+
+        Set<ConstraintViolation<T>> constraintViolations = validator.validate(object);
+        if (!constraintViolations.isEmpty()) {
+            throw new DTOValidationException(
+                    constraintViolations.stream()
+                            .map( cv -> cv == null ? "null" : cv.getPropertyPath() + ": " + cv.getMessage() )
+                            .collect( Collectors.joining( ", " ) )
+            );
+        }
     }
 }

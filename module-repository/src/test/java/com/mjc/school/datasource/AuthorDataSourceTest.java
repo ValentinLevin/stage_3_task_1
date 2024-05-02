@@ -83,7 +83,6 @@ class AuthorDataSourceTest {
         Long idForCheck = findRandomId();
 
         Author firstFetchEntity = dataSource.findById(idForCheck);
-
         Author secondFetchEntity_ForChange = dataSource.findById(idForCheck);
 
         secondFetchEntity_ForChange.setName("Change author name");

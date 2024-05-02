@@ -4,14 +4,12 @@ import com.mjc.school.dto.AuthorDTO;
 import com.mjc.school.model.Author;
 import org.modelmapper.ModelMapper;
 
-public class AuthorDTOMapper {
+public class AuthorMapper {
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    public static Author toAuthor(AuthorDTO authorDTO) {
-        return authorDTO == null ? null : modelMapper.map(authorDTO, Author.class);
-    }
+    private AuthorMapper() {}
 
-    public static AuthorDTO fromAuthor(Author author) {
+    public static AuthorDTO toAuthorDTO(Author author) {
         return author == null ? null : modelMapper.map(author, AuthorDTO.class);
     }
 }

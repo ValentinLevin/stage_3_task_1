@@ -3,7 +3,8 @@ package com.mjc.school.exception.repository;
 public enum ERROR_CODE {
     DATA_FILE_NOT_FOUND(1),
     ILLEGAL_ARGUMENT_VALUE(2),
-    ENTITY_VALIDATION_FAILED(3);
+    ENTITY_VALIDATION_FAILED(3),
+    DTO_VALIDATION_FAILED(4);
 
     private final int errorCode;
 

@@ -1,5 +1,6 @@
 package com.mjc.school.mapper;
 
+import com.mjc.school.dto.EditNewsRequestDTO;
 import com.mjc.school.dto.NewsDTO;
 import com.mjc.school.model.News;
 import org.modelmapper.Converter;
@@ -8,8 +9,8 @@ import org.modelmapper.ModelMapper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class NewsDTOMapper {
-    private static ModelMapper modelMapper = new ModelMapper();
+public class NewsMapper {
+    private static final ModelMapper modelMapper = new ModelMapper();
 
     static {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -20,15 +21,18 @@ public class NewsDTOMapper {
         modelMapper.addConverter(localDateTimeToStringConverter);
         modelMapper.addConverter(stringToLocalDateTimeConverter);
 
-        modelMapper.typeMap(NewsDTO.class, News.class).addMappings(mapper -> mapper.skip(News::setCreateDate));
-        modelMapper.typeMap(NewsDTO.class, News.class).addMappings(mapper -> mapper.skip(News::setLastUpdateDate));
+        modelMapper.typeMap(EditNewsRequestDTO.class, News.class).addMappings(mapper -> mapper.skip(News::setId));
+        modelMapper.typeMap(EditNewsRequestDTO.class, News.class).addMappings(mapper -> mapper.skip(News::setCreateDate));
+        modelMapper.typeMap(EditNewsRequestDTO.class, News.class).addMappings(mapper -> mapper.skip(News::setLastUpdateDate));
     }
 
-    public static News toNews(NewsDTO dto) {
+    private NewsMapper() {}
+
+    public static News fromEditNewsRequestDTO(EditNewsRequestDTO dto) {
         return dto == null ? null : modelMapper.map(dto, News.class);
     }
 
-    public static NewsDTO fromNews(News news) {
+    public static NewsDTO toNewsDTO(News news) {
         return news == null ? null : modelMapper.map(news, NewsDTO.class);
     }
 }
