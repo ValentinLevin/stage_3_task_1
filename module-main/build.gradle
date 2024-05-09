@@ -5,6 +5,10 @@ plugins {
 dependencies {
     implementation project(":module-shared")
     implementation project(":module-service")
+    implementation project(":module-web")
+
+    implementation 'org.eclipse.jetty:jetty-server:12.0.8'
+    implementation 'org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.8'
 }
 
 application {
