@@ -14,21 +14,28 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewsDTO {
+    @JsonProperty("id")
     private Long id;
 
     @NotEmpty(message = "News title is required")
     @Size(min = 5, message = "The title of the news must be at least 5 characters")
     @Size(max = 30, message = "The title of the news must be no more than 30 characters")
+    @JsonProperty("title")
     private String title;
 
     @NotEmpty(message = "News content is required")
     @Size(min = 5, message = "The content of the news must be at least 5 characters")
     @Size(max = 30, message = "The content of the news must be no more than 255 characters")
+    @JsonProperty("content")
     private String content;
 
+    @JsonProperty("createDate")
     private String createDate;
+
+    @JsonProperty("lastUpdateDate")
     private String lastUpdateDate;
 
+    @JsonProperty("author")
     private AuthorDTO author;
 
     @Override

@@ -13,8 +13,10 @@ import java.util.Objects;
 @NoArgsConstructor
 public class AuthorDTO {
     @NotNull(message = "Author id is required")
+    @JsonProperty("id")
     private Long id;
 
+    @JsonProperty("name")
     private String name;
 
     @Override

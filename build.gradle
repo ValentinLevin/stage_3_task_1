@@ -1,7 +1,7 @@
 plugins {
     id 'idea'
     id 'java'
-    id 'io.spring.dependency-management' version '1.1.4'
+//    id 'io.spring.dependency-management' version '1.1.4'
 }
 
 allprojects {
@@ -11,7 +11,7 @@ allprojects {
 
 subprojects {
     apply plugin : 'java'
-    apply plugin : 'io.spring.dependency-management'
+//    apply plugin : 'io.spring.dependency-management'
 
     idea {
         project {
@@ -29,30 +29,36 @@ subprojects {
         mavenCentral()
     }
 
-    dependencyManagement {
+/*    dependencyManagement {
         imports {
             mavenBom("org.springframework.boot:spring-boot-dependencies:3.2.4")
         }
-    }
+    }*/
 
     dependencies {
-        annotationProcessor "org.projectlombok:lombok"
-        compileOnly "org.projectlombok:lombok"
+        annotationProcessor 'org.projectlombok:lombok:1.18.32'
+        compileOnly 'org.projectlombok:lombok:1.18.32'
+
+        implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
+        annotationProcessor 'org.hibernate.validator:hibernate-validator-annotation-processor:8.0.1.Final'
+
+        implementation "com.fasterxml.jackson.core:jackson-databind:2.17.1"
+        implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1"
 
         implementation 'org.hibernate.validator:hibernate-validator'
-        annotationProcessor 'org.hibernate.validator:hibernate-validator-annotation-processor'
-
         implementation 'org.glassfish.expressly:expressly:5.0.0'
 
-        testImplementation 'org.junit.jupiter:junit-jupiter'
-        testImplementation 'org.assertj:assertj-core'
-        testImplementation 'org.mockito:mockito-core'
-        testImplementation 'org.mockito:mockito-junit-jupiter'
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+        testImplementation 'org.assertj:assertj-core:3.25.3'
+        testImplementation 'org.mockito:mockito-core:5.11.0'
+        testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
     }
 
     configurations.configureEach {
         resolutionStrategy {
             failOnVersionConflict()
+            force("org.slf4j:slf4j-api:2.0.13")
+            force("net.bytebuddy:byte-buddy:1.14.12")
         }
     }
 

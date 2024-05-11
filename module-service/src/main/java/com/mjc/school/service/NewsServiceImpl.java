@@ -49,6 +49,7 @@ class NewsServiceImpl implements NewsService {
 
         News news = NewsMapper.fromEditNewsRequestDTO(newsDTO);
         news.setCreateDate(LocalDateTime.now());
+        news.setLastUpdateDate(news.getCreateDate());
 
         news = newsRepository.save(news);
 

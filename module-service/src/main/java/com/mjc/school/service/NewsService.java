@@ -3,6 +3,7 @@ package com.mjc.school.service;
 import com.mjc.school.dto.EditNewsRequestDTO;
 import com.mjc.school.dto.NewsDTO;
 
+import java.io.Serializable;
 import java.util.List;
 
 public interface NewsService {
