@@ -8,6 +8,7 @@ public interface Repository <T> {
     boolean delete(T entity);
     boolean deleteById(Long id);
     List<T> findAll();
+    List<T> findAll(long offset, long limit);
     boolean existsById(Long id);
     long count();
 }

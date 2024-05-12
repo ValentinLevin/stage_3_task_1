@@ -11,5 +11,7 @@ public interface NewsService {
     NewsDTO update(Long newsId, EditNewsRequestDTO newsDTO);
     NewsDTO findById(long id);
     List<NewsDTO> findAll();
+    List<NewsDTO> findAll(long offset, long limit);
     boolean deleteById(long id);
+    long count();
 }

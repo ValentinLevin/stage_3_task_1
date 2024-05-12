@@ -7,17 +7,17 @@ import com.mjc.school.model.Entity;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
 class DataSourceImpl<T extends Entity> implements DataSource<T> {
     private final Class<T> entityClass;
-    private final Map<Long, T> values = new HashMap<>();
+    private final Map<Long, T> values = new LinkedHashMap<>();
     private final ReadWriteLock entityLock = new ReentrantReadWriteLock();
     private final AtomicLong nextId = new AtomicLong(1L);
 
@@ -77,9 +77,27 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
         try {
             return this.values.values().stream()
                     .map(this::cloneEntity)
-                    .collect(Collectors.toList());
+                    .toList();
         } finally {
             entityLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public List<T> findAll(long offset, long limit) {
+        if (limit > 0 || offset < this.values.size()) {
+            entityLock.readLock().lock();
+            try {
+                return this.values.values().stream()
+                        .skip(offset)
+                        .limit(limit)
+                        .map(this::cloneEntity)
+                        .toList();
+            } finally {
+                entityLock.readLock().unlock();
+            }
+        } else {
+            return Collections.emptyList();
         }
     }
 

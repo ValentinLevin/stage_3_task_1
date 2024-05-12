@@ -1,24 +1,27 @@
 package com.mjc.school.servlet;
 
-import com.mjc.school.dto.AddNewsResponseDTO;
-import com.mjc.school.dto.EditNewsRequestDTO;
-import com.mjc.school.dto.NewsDTO;
-import com.mjc.school.mapper.RequestMapper;
-import com.mjc.school.mapper.ResponseMapper;
+import com.mjc.school.dto.*;
+import com.mjc.school.exception.CustomWebException;
+import com.mjc.school.exception.IllegalLimitValueException;
+import com.mjc.school.exception.repository.CustomException;
+import com.mjc.school.exception.repository.UnexpectedErrorException;
+import com.mjc.school.util.HttpServletRequestUtils;
+import com.mjc.school.util.ResponseMapper;
 import com.mjc.school.service.NewsService;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
-import static jakarta.servlet.http.HttpServletResponse.SC_OK;
+import static jakarta.servlet.http.HttpServletResponse.*;
 
 @WebServlet("/news")
+@Slf4j
 public class NewsServlet extends HttpServlet {
     private final NewsService newsService;
 
@@ -28,17 +31,45 @@ public class NewsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        List<NewsDTO> news = this.newsService.findAll();
-        ResponseMapper.writePayloadIntoResponseBody(resp, news, SC_OK);
+        Object responseBody;
+
+        try {
+            int limit = HttpServletRequestUtils.getLimitValueFromRequest(req);
+            int offset = HttpServletRequestUtils.getOffsetValueFromRequest(req);
+            List<NewsDTO> news = this.newsService.findAll();
+            long totalCount = this.newsService.count();
+            responseBody = new GetNewsListResponseDTO(news, offset+1, news.size(), totalCount);
+                    ResponseMapper.writePayloadIntoResponseBody(resp, responseBody, SC_OK);
+        } catch (CustomWebException e) {
+
+        } catch (CustomException e) {
+            responseBody = new BaseResponseDTO(e);
+        } catch (Exception e) {
+            log.error("Error when processing a request to get a list of news", e);
+            responseBody = new BaseResponseDTO(e);
+        }
+
     }
 
+
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        EditNewsRequestDTO newsDTO = RequestMapper.readObjectFromRequestBody(req, EditNewsRequestDTO.class);
-
-        NewsDTO savedNewsDTO = newsService.add(newsDTO);
-        AddNewsResponseDTO responseBody = new AddNewsResponseDTO(savedNewsDTO);
-
-        ResponseMapper.writePayloadIntoResponseBody(resp, responseBody, SC_CREATED);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        Object responseBody;
+        try {
+            EditNewsRequestDTO newsDTO = HttpServletRequestUtils.readObjectFromRequestBody(req, EditNewsRequestDTO.class);
+            NewsDTO savedNewsDTO = newsService.add(newsDTO);
+            responseBody = new AddNewsResponseDTO(savedNewsDTO);
+            ResponseMapper.writePayloadIntoResponseBody(resp, responseBody, SC_CREATED);
+        } catch (CustomWebException e) {
+            responseBody = new BaseResponseDTO(e);
+            ResponseMapper.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
+        } catch (CustomException e) {
+            responseBody = new BaseResponseDTO(e);
+            ResponseMapper.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            log.error("Error processing a request to add news", e);
+            responseBody = new BaseResponseDTO(e);
+            ResponseMapper.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
+        }
     }
 }

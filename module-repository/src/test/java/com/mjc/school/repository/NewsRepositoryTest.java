@@ -104,4 +104,9 @@ class NewsRepositoryTest {
         Mockito.doReturn(news).when(dataSource).save(news);
         assertThatThrownBy(() -> repository.save(news)).isInstanceOf(EntityValidationException.class);
     }
+
+    @Test
+    void testOffset() {
+
+    }
 }

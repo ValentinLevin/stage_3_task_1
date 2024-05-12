@@ -41,7 +41,7 @@ class NewsDataSourceTest {
                 "News 1 content",
                 LocalDateTime.of(2024, 04, 05, 14, 12, 31),
                 LocalDateTime.of(2024, 11, 02, 21, 36, 01),
-                1L
+                2L
                 );
 
         Optional<News> actualNews = readItems.stream().filter(item -> item.getId() == 1L).findFirst();
@@ -132,7 +132,7 @@ class NewsDataSourceTest {
     }
 
     @Test
-    @DisplayName("При попытке поиска по существующему id будет возвращена сущность с соответствующим id")
+    @DisplayName("When trying to search by an existing id, an entity with the corresponding id will be returned")
     void findById_found() {
         Long idForFetch = findRandomId();
         News news = dataSource.findById(idForFetch);
@@ -140,9 +140,15 @@ class NewsDataSourceTest {
     }
 
     @Test
-    @DisplayName("При попытке поиска по несуществующему id будет возвращен null")
+    @DisplayName("If you try to search by a non-existent id, null will be returned")
     void findById_notFound_nullAsResult() {
         News news = dataSource.findById(-1L);
         assertThat(news).isNull();
     }
+
+    @Test
+    void testOffset() {
+
+    }
+
 }

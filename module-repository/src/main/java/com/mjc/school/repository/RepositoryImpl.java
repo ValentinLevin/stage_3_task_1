@@ -69,6 +69,11 @@ class RepositoryImpl<T extends Entity> implements Repository<T>{
     }
 
     @Override
+    public List<T> findAll(long offset, long limit) {
+        return this.dataSource.findAll(offset, limit);
+    }
+
+    @Override
     public boolean existsById(Long id) {
         return this.dataSource.existsById(id);
     }

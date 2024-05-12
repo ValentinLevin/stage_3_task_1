@@ -101,15 +101,26 @@ class NewsServiceImpl implements NewsService {
 
     @Override
     public List<NewsDTO> findAll() {
+        return this.findAll(0, -1);
+    }
+
+    @Override
+    public List<NewsDTO> findAll(long offset, long limit) {
         Map<Long, Author> authors =
                 this.authorRepository.findAll().stream()
                         .collect(Collectors.toMap(Author::getId, item -> item));
 
-        List<News> news = this.newsRepository.findAll();
+        List<News> news;
+        if (offset == 0 && limit == -1) {
+            news = this.newsRepository.findAll();
+        } else {
+            news = this.newsRepository.findAll(offset, limit);
+        }
+
         return news.stream()
                 .map(item -> {
                     NewsDTO newsDTO = NewsMapper.toNewsDTO(item);
-                    newsDTO.setAuthor(AuthorMapper.toAuthorDTO(authors.get(item.getId())));
+                    newsDTO.setAuthor(AuthorMapper.toAuthorDTO(authors.get(item.getAuthorId())));
                     return newsDTO;
                 })
                 .toList();
@@ -118,6 +129,11 @@ class NewsServiceImpl implements NewsService {
     @Override
     public boolean deleteById(long id) {
         return this.newsRepository.deleteById(id);
+    }
+
+    @Override
+    public long count() {
+        return this.newsRepository.count();
     }
 
     private <T> void validateDTO(T object) {

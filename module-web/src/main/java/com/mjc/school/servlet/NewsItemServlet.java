@@ -10,26 +10,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(name = "singleItemNewsServlet", urlPatterns = "/news/{id}")
+@WebServlet("/news/*")
 public class NewsItemServlet extends HttpServlet {
     private final NewsService newsService;
 
-    public NewsItemServlet() {
-        this.newsService = NewsServiceFactory.newsService();
+    public NewsItemServlet(NewsService newsService) {
+        this.newsService = newsService;
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPut(req, resp);
+        System.out.println("doPut");
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);
+        System.out.println("doGet");
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doDelete(req, resp);
+        System.out.println("doDelete");
     }
 }

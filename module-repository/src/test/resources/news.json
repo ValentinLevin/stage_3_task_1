@@ -5,7 +5,7 @@
     "content": "News 1 content",
     "createDate": "2024/04/05 14:12:31",
     "lastUpdateDate": "2024/11/02 21:36:01",
-    "authorId": 1
+    "authorId": 2
   },
   {
     "id": 2,
@@ -13,7 +13,7 @@
     "content": "News 2 content",
     "createDate": "2024/01/05 14:12:31",
     "lastUpdateDate": "2024/02/15 04:03:12",
-    "authorId": 2
+    "authorId": 1
   },
   {
     "id": 3,

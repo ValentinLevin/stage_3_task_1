@@ -1,9 +1,9 @@
 package com.mjc.school;
 
 import com.mjc.school.service.NewsServiceFactory;
+import com.mjc.school.servlet.NewsItemServlet;
 import com.mjc.school.servlet.NewsServlet;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.CrossOriginHandler;
@@ -24,7 +24,8 @@ public class App {
         ServletContextHandler context = new ServletContextHandler("/");
         crossOriginHandler.setHandler(context);
 
-        ServletHolder servletHolder = context.addServlet(new NewsServlet(NewsServiceFactory.newsService()), "/news");
+        context.addServlet(new NewsServlet(NewsServiceFactory.newsService()), "/news");
+        context.addServlet(new NewsItemServlet(NewsServiceFactory.newsService()), "/news/*");
 
         server.start();
     }
