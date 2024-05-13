@@ -15,7 +15,6 @@ public class HttpServletRequestUtils {
     private static final ObjectMapper mapper = new JsonMapper().findAndRegisterModules();
 
     public static <T> T readObjectFromRequestBody(HttpServletRequest request, Class<T> clazz) {
-
         try {
             request.setCharacterEncoding("UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -77,4 +76,8 @@ public class HttpServletRequestUtils {
         return valueAsInt;
     }
 
+    public static long getIdFromPath(HttpServletRequest req, int pathPartIndex) {
+        String path = req.getPathInfo();
+        return Long.parseLong(path.replace("/", ""));
+    }
 }

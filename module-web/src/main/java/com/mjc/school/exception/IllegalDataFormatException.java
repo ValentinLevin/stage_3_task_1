@@ -20,7 +20,7 @@ public class IllegalDataFormatException extends CustomWebException {
     public IllegalDataFormatException(String data, Class<?> clazz) {
         super(
                 ERROR_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
-                String.format(MESSAGE_TEMPLATE_WITH_DATA, clazz.getCanonicalName(), data)
+                String.format(MESSAGE_TEMPLATE_WITH_DATA, clazz.getCanonicalName(), data),
                 HTTP_STATUS
         );
     }

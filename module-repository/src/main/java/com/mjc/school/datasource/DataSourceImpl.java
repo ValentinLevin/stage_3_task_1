@@ -65,7 +65,10 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
         entityLock.readLock().lock();
         try {
             T entity = this.values.get(id);
-            return entity == null ? null : cloneEntity(entity);
+            if (entity == null) {
+                throw new EntityNotFoundException(id, entityClass);
+            }
+            return cloneEntity(entity);
         } finally {
             entityLock.readLock().unlock();
         }
@@ -85,12 +88,12 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
 
     @Override
     public List<T> findAll(long offset, long limit) {
-        if (limit > 0 || offset < this.values.size()) {
+        if (offset < this.values.size()) {
             entityLock.readLock().lock();
             try {
                 return this.values.values().stream()
                         .skip(offset)
-                        .limit(limit)
+                        .limit(limit == -1 ? values.size() : limit)
                         .map(this::cloneEntity)
                         .toList();
             } finally {
@@ -133,7 +136,11 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
 
         entityLock.writeLock().lock();
         try {
-            return this.values.remove(id) != null;
+            if (this.values.containsKey(id)) {
+                return this.values.remove(id) != null;
+            } else {
+                throw new EntityNotFoundException(id, entityClass);
+            }
         } finally {
             entityLock.writeLock().unlock();
         }

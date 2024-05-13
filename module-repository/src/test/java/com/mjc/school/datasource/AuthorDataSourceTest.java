@@ -1,5 +1,6 @@
 package com.mjc.school.datasource;
 
+import com.mjc.school.exception.EntityNotFoundException;
 import com.mjc.school.model.Author;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 class AuthorDataSourceTest {
@@ -53,7 +55,7 @@ class AuthorDataSourceTest {
     void delete_SelectedEntityHasBeenRemoved_true() {
         long idToDelete = findRandomId();
         dataSource.delete(idToDelete);
-        assertThat(dataSource.findById(idToDelete)).isNull();
+        assertThatThrownBy(() -> dataSource.findById(idToDelete)).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -117,8 +119,7 @@ class AuthorDataSourceTest {
     @Test
     @DisplayName("If you try to search by a non-existent id, null will be returned")
     void findById_notFound_nullAsResult() {
-        Author author = dataSource.findById(-1L);
-        assertThat(author).isNull();
+        assertThatThrownBy(() -> dataSource.findById(-1L)).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test

@@ -1,6 +1,5 @@
 package com.mjc.school.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.exception.repository.UnexpectedErrorException;
@@ -9,10 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_OK;
-
 @Slf4j
-public class ResponseMapper {
+public class HttpServletResponseUtils {
     private static final ObjectMapper mapper = new JsonMapper().findAndRegisterModules();
 
     public static <T> void writePayloadIntoResponseBody(HttpServletResponse response, T value, int status) {

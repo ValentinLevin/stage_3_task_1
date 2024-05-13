@@ -1,15 +1,15 @@
 package com.mjc.school.datasource;
 
+import com.mjc.school.exception.EntityNotFoundException;
 import com.mjc.school.model.News;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NewsDataSourceTest {
     private static final DataSource<News> dataSource = DataSourceFactory.getDataSource(News.class);
@@ -54,14 +54,14 @@ class NewsDataSourceTest {
     void delete_checkNotExistsInDataSource() {
         Long idToDelete = findRandomId();
 
-        News itemToDelete = dataSource.findById(idToDelete);
+        dataSource.findById(idToDelete);
         long expectedCount = dataSource.count() - 1;
 
-        dataSource.delete(idToDelete);
-        News actualRecordAfterDelete = dataSource.findById(idToDelete);
-
-        assertThat(actualRecordAfterDelete).isNull();
+        assertThat(dataSource.delete(idToDelete)).isTrue();
         assertThat(dataSource.count()).isEqualTo(expectedCount);
+
+        assertThatThrownBy(() -> dataSource.delete(idToDelete)).isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> dataSource.findById(idToDelete)).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -140,15 +140,44 @@ class NewsDataSourceTest {
     }
 
     @Test
-    @DisplayName("If you try to search by a non-existent id, null will be returned")
+    @DisplayName("If you try to search on a non-existent ID, an exception EntityNotFoundException is thrown")
     void findById_notFound_nullAsResult() {
-        News news = dataSource.findById(-1L);
-        assertThat(news).isNull();
+        assertThatThrownBy(() -> dataSource.findById(-1L)).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
-    void testOffset() {
+    @DisplayName("findAll with assigned limit parameter returns a list of items with a size equal to the limit value")
+    void testLimit() {
+        int offset = 0;
+        int limit  = 1;
 
+        List<News> readItems = dataSource.findAll(offset, limit);
+
+        assertThat(readItems).hasSize(limit);
+
+        limit  = 2;
+
+        readItems = dataSource.findAll(offset, limit);
+
+        assertThat(readItems).hasSize(limit);
     }
 
+    @Test
+    @DisplayName("When offset is equals to 1 findAll returns only one item in result list")
+    void test() {
+        List<News> allItems = dataSource.findAll();
+
+        int offset = 1;
+        int limit  = 1;
+        List<News> actualItems = dataSource.findAll(offset, limit);
+        List<News> expectedItems = Collections.singletonList(allItems.get(1));
+        assertThat(actualItems).containsExactlyElementsOf(expectedItems);
+
+        expectedItems = new ArrayList<>(allItems);
+        expectedItems.remove(0);
+        limit = -1;
+        actualItems = dataSource.findAll(offset, limit);
+
+        assertThat(actualItems).containsExactlyElementsOf(expectedItems);
+    }
 }
