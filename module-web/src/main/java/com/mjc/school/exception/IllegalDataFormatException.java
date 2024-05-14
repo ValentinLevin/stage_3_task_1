@@ -1,6 +1,6 @@
 package com.mjc.school.exception;
 
-import com.mjc.school.exception.repository.ERROR_CODE;
+import com.mjc.school.constant.ERROR_CODE;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 

@@ -1,10 +1,10 @@
 package com.mjc.school.dto;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mjc.school.exception.CustomWebException;
 import com.mjc.school.exception.repository.CustomException;
-import com.mjc.school.exception.repository.ERROR_CODE;
+import com.mjc.school.constant.ERROR_CODE;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,7 +33,7 @@ public class BaseResponseDTO {
         );
     }
 
-    public BaseResponseDTO(CustomException exception) {
+    public BaseResponseDTO(CustomWebException exception) {
         this(
                 exception.getErrorCode().getId(),
                 exception.getMessage()

@@ -50,7 +50,9 @@ public class NewsItemServlet extends HttpServlet {
             long id = HttpServletRequestUtils.getIdFromPath(req, 1);
             NewsDTO newsDTO = newsService.findById(id);
             HttpServletResponseUtils.writePayloadIntoResponseBody(resp, newsDTO, SC_OK);
-        } catch (Fou)
+        } catch (EntityNotFoundException e) {
+
+        }
     }
 
     @Override

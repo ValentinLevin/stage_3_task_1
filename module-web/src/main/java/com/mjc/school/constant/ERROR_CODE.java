@@ -1,4 +1,4 @@
-package com.mjc.school.exception.repository;
+package com.mjc.school.constant;
 
 public enum ERROR_CODE {
     NO_ERROR(0),
