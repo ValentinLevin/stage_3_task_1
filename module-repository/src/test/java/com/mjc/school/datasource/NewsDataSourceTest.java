@@ -6,7 +6,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,7 +31,8 @@ class NewsDataSourceTest {
     @Test
     @DisplayName("All news data has been read")
     void readDataFromFile_allDataHasBeenLoaded_firstNewsDataIsEqualsToExpected() {
-        List<Long> expectedIdList = List.of(1L, 2L, 3L);
+        List<Long> expectedIdList = new ArrayList<>();
+        LongStream.range(1, 26).forEach(expectedIdList::add);
         assertThat(readItems).hasSameSizeAs(expectedIdList);
 
         assertThat(readItems)
@@ -40,7 +45,7 @@ class NewsDataSourceTest {
                 "News 1 title",
                 "News 1 content",
                 LocalDateTime.of(2024, 04, 05, 14, 12, 31),
-                LocalDateTime.of(2024, 11, 02, 21, 36, 01),
+                LocalDateTime.of(2024, 05, 01, 9, 25, 01),
                 2L
                 );
 
@@ -163,21 +168,47 @@ class NewsDataSourceTest {
     }
 
     @Test
-    @DisplayName("When offset is equals to 1 findAll returns only one item in result list")
+    @DisplayName("If the offset is 2 and the limit is 5, then findAll returns exactly elements with indexes 2-6")
     void test() {
         List<News> allItems = dataSource.findAll();
 
-        int offset = 1;
-        int limit  = 1;
+        List<News> expectedItems =
+                List.of(
+                    allItems.get(2),
+                    allItems.get(3),
+                    allItems.get(4),
+                    allItems.get(5),
+                    allItems.get(6)
+                );
+
+        int offset = 2;
+        int limit  = 5;
+
         List<News> actualItems = dataSource.findAll(offset, limit);
-        List<News> expectedItems = Collections.singletonList(allItems.get(1));
-        assertThat(actualItems).containsExactlyElementsOf(expectedItems);
 
-        expectedItems = new ArrayList<>(allItems);
+        assertThat(actualItems).containsExactlyElementsOf(expectedItems);
+    }
+
+    @Test
+    @DisplayName("When the limit value is -1, the findAll method returns all elements after the element with index equal to offset value")
+    void testWithNegativeLimitValue() {
+        List<News> expectedItems = new ArrayList<>(dataSource.findAll());
         expectedItems.remove(0);
-        limit = -1;
-        actualItems = dataSource.findAll(offset, limit);
+        expectedItems.remove(0);
+
+        int offset = 2;
+        int limit = -1;
+
+        List<News> actualItems = dataSource.findAll(offset, limit);
 
         assertThat(actualItems).containsExactlyElementsOf(expectedItems);
+    }
+
+    @Test
+    @DisplayName("When the offset value is equal of higher that total element count, the findAll method returns empty list")
+    void testWithTooMuchOffsetValue() {
+        long offset = dataSource.count();
+        List<News> actualItems = dataSource.findAll(offset, 1);
+        assertThat(actualItems).isEmpty();
     }
 }

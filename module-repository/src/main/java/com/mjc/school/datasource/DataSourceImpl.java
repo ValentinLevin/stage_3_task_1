@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mjc.school.exception.*;
 import com.mjc.school.model.Entity;
+import jakarta.validation.Path;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,6 +43,7 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
 
     private List<T> readDataFromFile(String dataFileName, Class<T> entityClass) {
         ClassLoader classLoader = AuthorDataSource.class.getClassLoader();
+
         try (InputStream is = classLoader.getResourceAsStream(dataFileName)) {
             if (is == null) {
                 throw new DataFileNotFoundException(dataFileName);
