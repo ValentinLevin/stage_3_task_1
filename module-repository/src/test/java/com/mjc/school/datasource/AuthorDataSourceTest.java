@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
+@DisplayName("AuthorDataSource")
 class AuthorDataSourceTest {
     private static final DataSource<Author> dataSource = DataSourceFactory.getDataSource(Author.class);
     private static final List<Author> readItems = dataSource.findAll();
@@ -47,7 +48,7 @@ class AuthorDataSourceTest {
         dataSource.delete(idToDelete);
 
         assertThat(dataSource.count()).isEqualTo(expectedAuthorCountAfterDelete);
-        assertThat(dataSource.findById(idToDelete)).isNull();
+        assertThatThrownBy(() -> dataSource.findById(idToDelete)).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test

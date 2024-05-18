@@ -43,15 +43,11 @@ public class NewsServlet extends HttpServlet {
         } catch (CustomWebException e) {
             BaseResponseDTO responseBody = new BaseResponseDTO(e);
             HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
-        } catch (CustomException e) {
-            BaseResponseDTO responseBody = new BaseResponseDTO(e);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
             log.error("Error when processing a request to get a list of news", e);
             BaseResponseDTO responseBody = new BaseResponseDTO(e);
             HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
         }
-
     }
 
     @Override
@@ -68,9 +64,6 @@ public class NewsServlet extends HttpServlet {
         } catch (CustomWebException e) {
             BaseResponseDTO responseBody = new BaseResponseDTO(e);
             HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
-        } catch (CustomException e) {
-            BaseResponseDTO responseBody = new BaseResponseDTO(e);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
             log.error("Error processing a request to add news", e);
             BaseResponseDTO responseBody = new BaseResponseDTO(e);

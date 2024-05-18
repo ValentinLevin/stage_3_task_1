@@ -28,7 +28,7 @@ public class HttpServletRequestUtils {
                 builder.append(line);
             }
         } catch (IOException e) {
-            throw new RequestBodyReadException();
+            throw new UnexceptedException(e);
         }
 
         try {

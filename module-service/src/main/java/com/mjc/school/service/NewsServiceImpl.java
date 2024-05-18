@@ -2,8 +2,10 @@ package com.mjc.school.service;
 
 import com.mjc.school.dto.EditNewsRequestDTO;
 import com.mjc.school.dto.NewsDTO;
+import com.mjc.school.exception.AuthorNotFoundException;
 import com.mjc.school.exception.DTOValidationException;
 import com.mjc.school.exception.EntityNotFoundException;
+import com.mjc.school.exception.NewsNotFoundException;
 import com.mjc.school.mapper.AuthorMapper;
 import com.mjc.school.mapper.NewsMapper;
 import com.mjc.school.model.Author;
@@ -44,7 +46,7 @@ class NewsServiceImpl implements NewsService {
         validateDTO(newsDTO);
 
         if (!authorRepository.existsById(newsDTO.getAuthorId())) {
-            throw new DTOValidationException(String.format("Not exists author with id %d", newsDTO.getAuthorId()));
+            throw new AuthorNotFoundException(newsDTO.getAuthorId());
         }
 
         News news = NewsMapper.fromEditNewsRequestDTO(newsDTO);
@@ -64,14 +66,15 @@ class NewsServiceImpl implements NewsService {
 
         validateDTO(newsDTO);
 
-        News news = newsRepository.findById(newsId);
-
-        if (news == null) {
-            throw new EntityNotFoundException(newsId, News.class);
+        News news;
+        try {
+            news = newsRepository.findById(newsId);
+        } catch (EntityNotFoundException e) {
+            throw new NewsNotFoundException(newsId);
         }
 
         if (!authorRepository.existsById(newsDTO.getAuthorId())) {
-            throw new EntityNotFoundException(newsDTO.getAuthorId(), Author.class);
+            throw new AuthorNotFoundException(newsDTO.getAuthorId());
         }
 
         news.setTitle(newsDTO.getTitle());
@@ -86,17 +89,19 @@ class NewsServiceImpl implements NewsService {
 
     @Override
     public NewsDTO findById(long id) {
-        News news = this.newsRepository.findById(id);
-        if (news != null) {
-            Author author = this.authorRepository.findById(news.getAuthorId());
-
-            NewsDTO newsDTO = NewsMapper.toNewsDTO(news);
-            newsDTO.setAuthor(author != null ? AuthorMapper.toAuthorDTO(author) : null);
-
-            return newsDTO;
-        } else {
-            return null;
+        News news;
+        try {
+            news = this.newsRepository.findById(id);
+        } catch (EntityNotFoundException e) {
+            throw new NewsNotFoundException(id);
         }
+
+        Author author = this.authorRepository.findById(news.getAuthorId());
+
+        NewsDTO newsDTO = NewsMapper.toNewsDTO(news);
+        newsDTO.setAuthor(author != null ? AuthorMapper.toAuthorDTO(author) : null);
+
+        return newsDTO;
     }
 
     @Override
@@ -128,7 +133,11 @@ class NewsServiceImpl implements NewsService {
 
     @Override
     public boolean deleteById(long id) {
-        return this.newsRepository.deleteById(id);
+        try {
+            return this.newsRepository.deleteById(id);
+        } catch (EntityNotFoundException e) {
+            throw new NewsNotFoundException(id);
+        }
     }
 
     @Override

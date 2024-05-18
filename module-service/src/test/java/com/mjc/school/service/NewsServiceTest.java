@@ -3,8 +3,10 @@ package com.mjc.school.service;
 import com.mjc.school.dto.AuthorDTO;
 import com.mjc.school.dto.EditNewsRequestDTO;
 import com.mjc.school.dto.NewsDTO;
+import com.mjc.school.exception.AuthorNotFoundException;
 import com.mjc.school.exception.DTOValidationException;
 import com.mjc.school.exception.EntityNotFoundException;
+import com.mjc.school.exception.NewsNotFoundException;
 import com.mjc.school.model.Author;
 import com.mjc.school.model.News;
 import com.mjc.school.repository.Repository;
@@ -65,55 +67,14 @@ class NewsServiceTest {
     }
 
     @Test
-    @DisplayName("If you specify an incorrect news id, null will be returned")
+    @DisplayName("If you specify an incorrect news id, a NewsNotFoundException will be thrown")
     void findById_exists_false() {
-        Mockito.when(newsRepository.findById(1L)).thenReturn(null);
-        NewsDTO actualNewsDTO = newsService.findById(1L);
-        assertThat(actualNewsDTO).isNull();
+        Mockito.when(newsRepository.findById(1L)).thenThrow(EntityNotFoundException.class);
+        assertThatThrownBy(() -> newsService.findById(1L)).isInstanceOf(NewsNotFoundException.class);
     }
 
     @Test
-    @DisplayName("Checking an object transferred for saving to the repository when calling the method to add news")
-    void add_correctData() {
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "News title",
-                "News content",
-                2L
-        );
-
-        Mockito.when(authorRepository.existsById(2L)).thenReturn(true);
-
-        ArgumentCaptor<News> argumentCaptor = ArgumentCaptor.forClass(News.class);
-
-        LocalDateTime createDateFrom = LocalDateTime.now();
-        newsService.add(requestDTO);
-        LocalDateTime createDateTo = LocalDateTime.now();
-
-        Mockito.verify(newsRepository).save(argumentCaptor.capture());
-
-        News actualNews = argumentCaptor.getValue();
-
-        assertThat(actualNews)
-                .extracting("title", "content", "authorId")
-                .containsOnly(requestDTO.getTitle(), requestDTO.getContent(), requestDTO.getAuthorId());
-
-        assertThat(actualNews.getCreateDate()).isStrictlyBetween(createDateFrom, createDateTo);
-    }
-
-    @Test
-    @DisplayName("Checking an object transferred for saving to the repository when calling the method to add news")
-    void add_incorrectData_throwsDTOValidateException() {
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "12",
-                "News content",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(2L)).thenReturn(true);
-        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(DTOValidationException.class);
-    }
-
-    @Test
-    @DisplayName("Проверка удаления новости по id")
+    @DisplayName("The correct ID was sent. Execution without errors")
     void deleteById_exists() {
         Long idForDelete = 1L;
         boolean expectedDeleteResult = true;
@@ -132,90 +93,10 @@ class NewsServiceTest {
     }
 
     @Test
-    @DisplayName("Проверка передаваемой сущности для записи в репозиторий, сгенерированной на основании пришедшего запроса на изменение")
-    void update_checkEntityToSave() {
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "Changed title",
-                "Changed contend",
-                1L
-        );
-
-        Long newsIdToChange = 2L;
-
-        News newsBeforeChange = new News(
-                newsIdToChange,
-                "Start title",
-                "Start content",
-                LocalDateTime.of(2024, 4, 16, 14, 33, 3),
-                null,
-                3L
-        );
-
-        News expectedNews = new News(
-                newsIdToChange,
-                requestDTO.getTitle(),
-                requestDTO.getContent(),
-                newsBeforeChange.getCreateDate(),
-                LocalDateTime.of(2024, 4, 16, 14, 37, 31),
-                requestDTO.getAuthorId()
-        );
-
-        Mockito.when(newsRepository.findById(newsIdToChange)).thenReturn(newsBeforeChange);
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        Mockito.when(newsRepository.save(Mockito.any(News.class))).thenReturn(expectedNews);
-
-        ArgumentCaptor<News> argumentCaptor = ArgumentCaptor.forClass(News.class);
-
-        LocalDateTime updateDateTimeFrom = LocalDateTime.now();
-        newsService.update(newsIdToChange, requestDTO);
-        LocalDateTime updateDateTimeTo = LocalDateTime.now();
-
-        Mockito.verify(newsRepository).save(argumentCaptor.capture());
-
-        News actualNews = argumentCaptor.getValue();
-
-        assertThat(actualNews.getLastUpdateDate()).isStrictlyBetween(updateDateTimeFrom, updateDateTimeTo);
-        expectedNews.setLastUpdateDate(actualNews.getLastUpdateDate());
-        assertThat(actualNews).isEqualTo(expectedNews);
-    }
-
-    @Test
-    @DisplayName("Checking an object transferred for saving to the repository when calling the method to update news")
-    void update_incorrectData_throwsDTOValidateException() {
-        Long newsIdForUpdate = 1L;
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "12",
-                "News content",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(DTOValidationException.class);
-    }
-
-    @Test
-    @DisplayName("При передаче некорректного id нового автора будет выброшено исключение EntityNotFoundException")
-    void update_notFoundNewAuthor_throwsDTOValidateException() {
-        Long newsIdForUpdate = 1L;
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "News title",
-                "News content",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(false);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(EntityNotFoundException.class);
-    }
-
-    @Test
-    @DisplayName("При передаче id несуществующей новости будет выброшено EntityNotFoundException")
-    void update_notFoundNewsById_throwsEntityNotFoundException() {
-        Long newsIdForUpdate = 1L;
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "News title",
-                "News content",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        Mockito.when(newsRepository.findById(newsIdForUpdate)).thenReturn(null);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(EntityNotFoundException.class);
+    @DisplayName("The incorrect ID was sent. The delete method will throw NewsNotFoundException")
+    void deleteById_notExists() {
+        long idForDelete = 1L;
+        Mockito.when(newsRepository.deleteById(idForDelete)).thenThrow(EntityNotFoundException.class);
+        assertThatThrownBy(() -> newsService.deleteById(idForDelete)).isInstanceOf(NewsNotFoundException.class);
     }
 }

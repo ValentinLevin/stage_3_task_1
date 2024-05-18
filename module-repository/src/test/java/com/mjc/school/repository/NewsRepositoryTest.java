@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@DisplayName("NewsRepository")
 class NewsRepositoryTest {
     private DataSource<News> dataSource;
     private Repository<News> repository;

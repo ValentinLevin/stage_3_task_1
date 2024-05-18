@@ -1,11 +1,10 @@
 package com.mjc.school.servlet;
 
-import com.mjc.school.dto.BaseResponseDTO;
-import com.mjc.school.dto.EditNewsRequestDTO;
-import com.mjc.school.dto.NewsDTO;
+import com.mjc.school.dto.*;
+import com.mjc.school.exception.CustomWebException;
+import com.mjc.school.exception.NewsNotFoundException;
+import com.mjc.school.exception.repository.CustomException;
 import com.mjc.school.service.NewsService;
-
-import com.mjc.school.service.NewsServiceFactory;
 import com.mjc.school.util.HttpServletRequestUtils;
 import com.mjc.school.util.HttpServletResponseUtils;
 import jakarta.servlet.ServletException;
@@ -14,8 +13,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -33,30 +30,52 @@ public class NewsItemServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        long id = HttpServletRequestUtils.getIdFromPath(req, 1);
         try {
             EditNewsRequestDTO newsDTO = HttpServletRequestUtils.readObjectFromRequestBody(req, EditNewsRequestDTO.class);
-            long id = HttpServletRequestUtils.getIdFromPath(req, 1);
             NewsDTO editedNewsDTO = newsService.update(id, newsDTO);
+            UpdateNewsResponseDTO responseBody = new UpdateNewsResponseDTO(editedNewsDTO);
+            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_OK);
+        } catch (CustomWebException e) {
+            BaseResponseDTO responseBody = new BaseResponseDTO(e);
+            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
         } catch (Exception e) {
-            log.error("Ошибка при обработке запроса на изменение данных новости", e);
+            log.error("Error when processing a request to change news data with id {}", id, e);
             BaseResponseDTO responseBody = new BaseResponseDTO(e);
             HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        long id = HttpServletRequestUtils.getIdFromPath(req, 1);
         try {
-            long id = HttpServletRequestUtils.getIdFromPath(req, 1);
             NewsDTO newsDTO = newsService.findById(id);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, newsDTO, SC_OK);
-        } catch (EntityNotFoundException e) {
-
+            GetNewsItemResponseDTO responseBody = new GetNewsItemResponseDTO(newsDTO);
+            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_OK);
+        } catch (NewsNotFoundException e) {
+            BaseResponseDTO responseBody = new BaseResponseDTO(e);
+            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
+        } catch (Exception e) {
+            log.error("Error when requesting news by id {}", id, e);
+            BaseResponseDTO responseBody = new BaseResponseDTO(e);
+            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("doDelete");
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
+        long id = HttpServletRequestUtils.getIdFromPath(req, 1);
+        try {
+            newsService.deleteById(id);
+            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, new BaseResponseDTO(), SC_OK);
+        } catch (NewsNotFoundException e) {
+            BaseResponseDTO responseBody = new BaseResponseDTO(e);
+            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
+        } catch (Exception e) {
+            log.error("Error when deleting news by id {}", id, e);
+            BaseResponseDTO responseBody = new BaseResponseDTO(e);
+            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
+        }
     }
 }

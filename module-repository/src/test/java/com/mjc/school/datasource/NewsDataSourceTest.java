@@ -15,6 +15,7 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@DisplayName("NewsDataSource")
 class NewsDataSourceTest {
     private static final DataSource<News> dataSource = DataSourceFactory.getDataSource(News.class);
     private static final List<News> readItems = dataSource.findAll();

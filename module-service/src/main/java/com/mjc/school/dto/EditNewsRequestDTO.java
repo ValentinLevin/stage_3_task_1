@@ -25,7 +25,7 @@ public class EditNewsRequestDTO {
 
     @NotEmpty(message = "News content is required")
     @Size(min = 5, message = "The content of the news must be at least 5 characters")
-    @Size(max = 30, message = "The content of the news must be no more than 255 characters")
+    @Size(max = 255, message = "The content of the news must be no more than 255 characters")
     private String content;
 
     @NotNull(message = "Author id is required")

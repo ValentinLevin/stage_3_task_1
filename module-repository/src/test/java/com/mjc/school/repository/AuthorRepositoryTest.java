@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@DisplayName("AuthorRepository")
 class AuthorRepositoryTest {
     private DataSource<Author> dataSource;
     private Repository<Author> repository;
