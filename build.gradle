@@ -52,7 +52,6 @@ subprojects {
 
         implementation "jakarta.servlet:jakarta.servlet-api:${servletVersion}"
 
-
         implementation "org.slf4j:slf4j-api:${slf4jVersion}"
         testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
         testImplementation "org.assertj:assertj-core:${assertjVersion}"
