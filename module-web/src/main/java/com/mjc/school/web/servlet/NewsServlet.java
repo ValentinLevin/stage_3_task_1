@@ -37,7 +37,7 @@ public class NewsServlet extends HttpServlet {
             int offset = HttpServletRequestUtils.getOffsetValueFromRequest(req);
             List<NewsDTO> news = this.newsService.findAll(offset, limit);
             long totalCount = this.newsService.count();
-            GetNewsListResponseDTO responseBody = new GetNewsListResponseDTO(news, offset+1, news.size(), totalCount);
+            GetNewsListResponseDTO responseBody = new GetNewsListResponseDTO(news, offset+1L, news.size(), totalCount);
 
             HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_OK);
         } catch (CustomWebException e) {

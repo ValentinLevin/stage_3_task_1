@@ -31,10 +31,14 @@ public class HttpServletRequestUtils {
             throw new UnexpectedErrorException(e);
         }
 
+        if (builder.isEmpty()) {
+            throw new NoDataInRequestException();
+        }
+
         try {
             return mapper.readValue(builder.toString(), clazz);
         } catch (JsonProcessingException e) {
-            throw new IllegalDataFormatException(builder.toString(), clazz);
+            throw new IllegalDataFormatException(builder.toString());
         }
     }
 
