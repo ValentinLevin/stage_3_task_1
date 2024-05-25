@@ -1,5 +1,9 @@
 package com.mjc.school.service.service;
 
+import com.mjc.school.repository.exception.EntityNotFoundException;
+import com.mjc.school.repository.exception.EntityNullReferenceException;
+import com.mjc.school.repository.exception.EntityValidationException;
+import com.mjc.school.repository.exception.KeyNullReferenceException;
 import com.mjc.school.service.dto.EditNewsRequestDTO;
 import com.mjc.school.service.exception.AuthorNotFoundException;
 import com.mjc.school.service.exception.DTOValidationException;
@@ -33,7 +37,7 @@ class NewsServiceAddNewsTest {
 
     @Test
     @DisplayName("When the added news contains an author who is not in the list of authors, the method will throw an AuthorNotFoundException exception")
-    void add_incorrectData_throwsAuthorNotExistsException() {
+    void add_incorrectData_throwsAuthorNotExistsException() throws KeyNullReferenceException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "News title",
                 "News content",
@@ -44,7 +48,7 @@ class NewsServiceAddNewsTest {
     }
     @Test
     @DisplayName("Cases of correctness of news data. No exception should be thrown")
-    void correctData_noThrownExceptions() {
+    void correctData_noThrownExceptions() throws KeyNullReferenceException, EntityNotFoundException, EntityNullReferenceException, EntityValidationException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "12345",
                 "54321",
@@ -96,7 +100,7 @@ class NewsServiceAddNewsTest {
 
     @Test
     @DisplayName("If a news title is too short, a DTOValidationException will be thrown when calling the add method.")
-    void add_titleTooShort_throwsDTOValidateException() {
+    void add_titleTooShort_throwsDTOValidateException() throws KeyNullReferenceException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "12",
                 "News content",
@@ -107,8 +111,20 @@ class NewsServiceAddNewsTest {
     }
 
     @Test
+    @DisplayName("If a news title is empty, a DTOValidationException will be thrown when calling the add method.")
+    void add_emptyTitle_throwsDTOValidateException() throws KeyNullReferenceException {
+        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
+                "",
+                "News content",
+                12L
+        );
+        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
+        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(DTOValidationException.class);
+    }
+
+    @Test
     @DisplayName("If the news title is too long, a DTOValidationException will be thrown when calling the add method.")
-    void add_titleTooLong_throwsDTOValidateException() {
+    void add_titleTooLong_throwsDTOValidateException() throws KeyNullReferenceException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "1234567890123456789012345678901", // 31
                 "News content",
@@ -120,7 +136,7 @@ class NewsServiceAddNewsTest {
 
     @Test
     @DisplayName("If the news content is too long, a DTOValidationException will be thrown when calling the add method.")
-    void update_contentTooLong_throwsDTOValidateException() {
+    void update_contentTooLong_throwsDTOValidateException() throws KeyNullReferenceException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+ // 100 per line
                         "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+
@@ -134,7 +150,7 @@ class NewsServiceAddNewsTest {
 
     @Test
     @DisplayName("If a news content is too short, a DTOValidationException will be thrown when calling the add method.")
-    void update_contentTooShort_throwsDTOValidateException() {
+    void update_contentTooShort_throwsDTOValidateException() throws KeyNullReferenceException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "News title",
                 "123",
@@ -146,7 +162,7 @@ class NewsServiceAddNewsTest {
 
     @Test
     @DisplayName("When passing an incorrect id for author, an AuthorNotFoundException will be thrown")
-    void add_notFoundNewAuthor_throwsDTOValidateException() {
+    void add_notFoundNewAuthor_throwsDTOValidateException() throws KeyNullReferenceException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "News title",
                 "News content",

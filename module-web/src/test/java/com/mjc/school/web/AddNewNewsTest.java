@@ -5,8 +5,13 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.EditNewsRequestDTO;
 import com.mjc.school.service.dto.NewsDTO;
+import com.mjc.school.service.exception.CustomServiceException;
+import com.mjc.school.service.exception.DTOValidationException;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.dto.AddNewsResponseDTO;
+import com.mjc.school.web.exception.AuthorNotFoundWebException;
+import com.mjc.school.web.exception.DataValidationWebException;
+import com.mjc.school.web.exception.NoDataInRequestWebException;
 import com.mjc.school.web.servlet.NewsServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,26 +19,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
-@ExtendWith(MockitoExtension.class)
 class AddNewNewsTest {
-    @Mock
     private HttpServletRequest request;
-
-    @Mock
     private HttpServletResponse response;
-
-    @Mock
     private NewsService newsService;
 
     private ByteArrayOutputStream responseBodyStream;
@@ -41,6 +36,10 @@ class AddNewNewsTest {
 
     @BeforeEach
     void setup() throws IOException {
+        newsService = Mockito.mock(NewsService.class);
+        request = Mockito.mock(HttpServletRequest.class);
+        response = Mockito.mock(HttpServletResponse.class);
+
         Mockito.when(request.getMethod()).thenReturn("POST");
 
         responseBodyStream = new ByteArrayOutputStream();
@@ -50,7 +49,7 @@ class AddNewNewsTest {
 
     @Test
     @DisplayName("Adding news. Successful, no errors")
-    void createNewsTest() throws IOException, ServletException {
+    void createNewsTest() throws IOException, ServletException, CustomServiceException {
         String requestBody =
                 "{ " +
                         "\"title\" : \"News title\", " +
@@ -106,13 +105,91 @@ class AddNewNewsTest {
     }
 
     @Test
-    @DisplayName("Добавление новости. Не переданы данные новости в теле запроса")
-    void noBody() throws IOException, ServletException {
+    @DisplayName("Adding news. News data was not transmitted in the request body")
+    void requestWithoutBody() throws IOException, ServletException {
         StringReader reader = new StringReader("");
         BufferedReader bufferedReader = new BufferedReader(reader);
         Mockito.when(request.getReader()).thenReturn(bufferedReader);
 
         new NewsServlet(newsService).service(request, response);
 
+        AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
+
+        NoDataInRequestWebException expectedException = new NoDataInRequestWebException();
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
+    }
+
+    @Test
+    @DisplayName("Adding news. Incorrect news title value. Returned error status when adding")
+    void incorrectNewsData_emptyTitle() throws IOException, ServletException, CustomServiceException {
+        String requestBody =
+                "{ " +
+                        "\"title\" : \"\", " +
+                        "\"content\": \"News content\", " +
+                        "\"authorId\": 12" +
+                "}";
+
+        StringReader reader = new StringReader(requestBody);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        Mockito.when(request.getReader()).thenReturn(bufferedReader);
+
+        Mockito.when(newsService.add(Mockito.any())).thenThrow(new DTOValidationException(requestBody));
+
+        DataValidationWebException expectedException = new DataValidationWebException(requestBody);
+
+        new NewsServlet(newsService).service(request, response);
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+
+        AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+    }
+
+    @Test
+    @DisplayName("Adding news. Empty news object. Returned error status when adding")
+    void incorrectNewsData_emptyObject() throws IOException, ServletException, CustomServiceException {
+        StringReader reader = new StringReader("{}");
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        Mockito.when(request.getReader()).thenReturn(bufferedReader);
+
+        Mockito.when(newsService.add(Mockito.any())).thenThrow(DTOValidationException.class);
+
+        DataValidationWebException expectedException = new DataValidationWebException("");
+
+        new NewsServlet(newsService).service(request, response);
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+
+        AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+    }
+
+    @Test
+    @DisplayName("Adding news. Incorrect authorId")
+    void incorrectNewsData_incorrectAuthorId() throws IOException, ServletException, CustomServiceException {
+        String requestBody =
+                "{ " +
+                        "\"title\" : \"News title\", " +
+                        "\"content\": \"News content\", " +
+                        "\"authorId\": 0" +
+                        "}";
+
+        StringReader reader = new StringReader(requestBody);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        Mockito.when(request.getReader()).thenReturn(bufferedReader);
+
+        Mockito.when(newsService.add(Mockito.any())).thenThrow(com.mjc.school.service.exception.AuthorNotFoundException.class);
+
+        AuthorNotFoundWebException expectedException = new AuthorNotFoundWebException(0);
+
+        new NewsServlet(newsService).service(request, response);
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+
+        AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
     }
 }

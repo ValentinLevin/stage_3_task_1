@@ -1,5 +1,6 @@
 package com.mjc.school.repository.datasource;
 
+import com.mjc.school.repository.exception.CustomRepositoryException;
 import com.mjc.school.repository.exception.EntityNotFoundException;
 import com.mjc.school.repository.model.Author;
 import org.junit.jupiter.api.DisplayName;
@@ -40,8 +41,7 @@ class AuthorDataSourceTest {
 
     @Test
     @DisplayName("When deleting one entity, only one entity was deleted")
-    void delete_EntityHasBeenRemovedFromDataSource_true() {
-        List<Author> authors = dataSource.findAll();
+    void delete_EntityHasBeenRemovedFromDataSource_true() throws CustomRepositoryException {
         long expectedAuthorCountAfterDelete = dataSource.count()-1;
 
         Long idToDelete = findRandomId();
@@ -53,7 +53,7 @@ class AuthorDataSourceTest {
 
     @Test
     @DisplayName("When deleting an entity, it was the selected entity that was deleted")
-    void delete_SelectedEntityHasBeenRemoved_true() {
+    void delete_SelectedEntityHasBeenRemoved_true() throws CustomRepositoryException {
         long idToDelete = findRandomId();
         dataSource.delete(idToDelete);
         assertThatThrownBy(() -> dataSource.findById(idToDelete)).isInstanceOf(EntityNotFoundException.class);
@@ -61,7 +61,7 @@ class AuthorDataSourceTest {
 
     @Test
     @DisplayName("After adding a new entity, the number of records increased by 1")
-    void save_add_NumberOfRecordIncreasedByOneAfterAddingTheEntity_true() {
+    void save_add_NumberOfRecordIncreasedByOneAfterAddingTheEntity_true() throws CustomRepositoryException {
         long expectedAuthorCount = dataSource.count()+1;
 
         Author newAuthor = new Author("New Author");
@@ -72,7 +72,7 @@ class AuthorDataSourceTest {
 
     @Test
     @DisplayName("After adding a new entity, the author's data obtained from the dataSource is equal to the added data")
-    void save_add_newAuthorHasBeenAddedIntoDataSource() {
+    void save_add_newAuthorHasBeenAddedIntoDataSource() throws CustomRepositoryException {
         Author newAuthor = new Author("New Author");
         Author addedAuthor = dataSource.save(newAuthor);
         Author newAuthorDataReceivedFromDataSource = dataSource.findById(addedAuthor.getId());
@@ -82,7 +82,7 @@ class AuthorDataSourceTest {
 
     @Test
     @DisplayName("When changing the data of an entity issued by a dataSource, the entity data in the dataSource does not change")
-    void save_update_OnSavingAndFetchingNewInstanceOfEntityCreatedNotDependOfEachOther_true() {
+    void save_update_OnSavingAndFetchingNewInstanceOfEntityCreatedNotDependOfEachOther_true() throws CustomRepositoryException {
         Long idForCheck = findRandomId();
 
         Author firstFetchEntity = dataSource.findById(idForCheck);
@@ -102,7 +102,7 @@ class AuthorDataSourceTest {
 
     @Test
     @DisplayName("After saving the changes to the entity in the dataSource, the data is returned changed when the request is repeated")
-    void save_update_savedEntityIsEqualsToFetchedEntity_true() {
+    void save_update_savedEntityIsEqualsToFetchedEntity_true() throws CustomRepositoryException {
         Long idForFetch = findRandomId();
         Author expectedAuthor = dataSource.findById(idForFetch);
 
@@ -125,7 +125,7 @@ class AuthorDataSourceTest {
 
     @Test
     @DisplayName("If you try to search for an existing id, an entity with the corresponding id will be returned")
-    void findById_found() {
+    void findById_found() throws CustomRepositoryException {
         Long idForFetch = findRandomId();
         Author author = dataSource.findById(idForFetch);
         assertThat(author).isNotNull().extracting("id").isEqualTo(author.getId());
@@ -133,7 +133,7 @@ class AuthorDataSourceTest {
 
     @Test
     @DisplayName("When checking for the presence of an entity by an existing id, it will return true")
-    void existsById_exists_true() {
+    void existsById_exists_true() throws CustomRepositoryException {
         long idForCheck = findRandomId();
         assertThat(dataSource.existsById(idForCheck)).isTrue();
     }

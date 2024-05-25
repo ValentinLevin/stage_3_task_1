@@ -1,16 +1,17 @@
 package com.mjc.school.service.service;
 
-import com.mjc.school.service.dto.EditNewsRequestDTO;
-import com.mjc.school.service.dto.NewsDTO;
-import com.mjc.school.service.exception.AuthorNotFoundException;
-import com.mjc.school.service.exception.DTOValidationException;
 import com.mjc.school.repository.exception.EntityNotFoundException;
-import com.mjc.school.service.exception.NewsNotFoundException;
-import com.mjc.school.service.mapper.AuthorMapper;
-import com.mjc.school.service.mapper.NewsMapper;
+import com.mjc.school.repository.exception.EntityNullReferenceException;
+import com.mjc.school.repository.exception.EntityValidationException;
+import com.mjc.school.repository.exception.KeyNullReferenceException;
 import com.mjc.school.repository.model.Author;
 import com.mjc.school.repository.model.News;
 import com.mjc.school.repository.repository.Repository;
+import com.mjc.school.service.dto.EditNewsRequestDTO;
+import com.mjc.school.service.dto.NewsDTO;
+import com.mjc.school.service.exception.*;
+import com.mjc.school.service.mapper.AuthorMapper;
+import com.mjc.school.service.mapper.NewsMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -42,24 +43,36 @@ class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public NewsDTO add(EditNewsRequestDTO newsDTO) {
+    public NewsDTO add(
+            EditNewsRequestDTO newsDTO
+    ) throws DTOValidationException, AuthorNotFoundException, NullAuthorIdException, NewsNotFoundException, NullNewsIdException {
         validateDTO(newsDTO);
 
-        if (!authorRepository.existsById(newsDTO.getAuthorId())) {
-            throw new AuthorNotFoundException(newsDTO.getAuthorId());
+        try {
+            if (!authorRepository.existsById(newsDTO.getAuthorId())) {
+                throw new AuthorNotFoundException(newsDTO.getAuthorId());
+            }
+        } catch (KeyNullReferenceException e) {
+            throw new NullAuthorIdException();
         }
 
         News news = NewsMapper.fromEditNewsRequestDTO(newsDTO);
         news.setCreateDate(LocalDateTime.now());
         news.setLastUpdateDate(news.getCreateDate());
 
-        news = newsRepository.save(news);
+        try {
+            news = newsRepository.save(news);
+        } catch (EntityValidationException | EntityNullReferenceException e) {
+            throw new DTOValidationException(e.getMessage());
+        }
 
         return findById(news.getId());
     }
 
     @Override
-    public NewsDTO update(Long newsId, EditNewsRequestDTO newsDTO) {
+    public NewsDTO update(
+            Long newsId, EditNewsRequestDTO newsDTO
+    ) throws DTOValidationException, NullNewsIdException, NewsNotFoundException, AuthorNotFoundException, NullAuthorIdException {
         if (newsId == null || newsId <= 0) {
             throw new DTOValidationException(String.format("Incorrect news id value %d", newsId));
         }
@@ -69,12 +82,18 @@ class NewsServiceImpl implements NewsService {
         News news;
         try {
             news = newsRepository.findById(newsId);
+        } catch (KeyNullReferenceException e) {
+            throw new NullNewsIdException();
         } catch (EntityNotFoundException e) {
             throw new NewsNotFoundException(newsId);
         }
 
-        if (!authorRepository.existsById(newsDTO.getAuthorId())) {
-            throw new AuthorNotFoundException(newsDTO.getAuthorId());
+        try {
+            if (!authorRepository.existsById(newsDTO.getAuthorId())) {
+                throw new AuthorNotFoundException(newsDTO.getAuthorId());
+            }
+        } catch (KeyNullReferenceException e) {
+            throw new NullAuthorIdException();
         }
 
         news.setTitle(newsDTO.getTitle());
@@ -82,21 +101,36 @@ class NewsServiceImpl implements NewsService {
         news.setAuthorId(newsDTO.getAuthorId());
         news.setLastUpdateDate(LocalDateTime.now());
 
-        news = newsRepository.save(news);
+        try {
+            news = newsRepository.save(news);
+        } catch (EntityNullReferenceException e) {
+            throw new NullNewsIdException();
+        } catch (EntityValidationException e) {
+            throw new DTOValidationException(e.getMessage());
+        }
 
         return findById(news.getId());
     }
 
     @Override
-    public NewsDTO findById(long id) {
+    public NewsDTO findById(long id) throws NullNewsIdException, NewsNotFoundException, NullAuthorIdException, AuthorNotFoundException {
         News news;
         try {
             news = this.newsRepository.findById(id);
+        } catch (KeyNullReferenceException e) {
+            throw new NullNewsIdException();
         } catch (EntityNotFoundException e) {
             throw new NewsNotFoundException(id);
         }
 
-        Author author = this.authorRepository.findById(news.getAuthorId());
+        Author author;
+        try {
+            author = this.authorRepository.findById(news.getAuthorId());
+        } catch (KeyNullReferenceException e) {
+            throw new NullAuthorIdException();
+        } catch (EntityNotFoundException e) {
+            throw new AuthorNotFoundException(news.getAuthorId());
+        }
 
         NewsDTO newsDTO = NewsMapper.toNewsDTO(news);
         newsDTO.setAuthor(author != null ? AuthorMapper.toAuthorDTO(author) : null);
@@ -132,9 +166,11 @@ class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public boolean deleteById(long id) {
+    public boolean deleteById(long id) throws NullNewsIdException, NewsNotFoundException {
         try {
             return this.newsRepository.deleteById(id);
+        } catch (KeyNullReferenceException e) {
+            throw new NullNewsIdException();
         } catch (EntityNotFoundException e) {
             throw new NewsNotFoundException(id);
         }
@@ -145,7 +181,7 @@ class NewsServiceImpl implements NewsService {
         return this.newsRepository.count();
     }
 
-    private <T> void validateDTO(T object) {
+    private <T> void validateDTO(T object) throws DTOValidationException {
         if (object == null) {
             throw new DTOValidationException("Passed a null object as the object to add");
         }

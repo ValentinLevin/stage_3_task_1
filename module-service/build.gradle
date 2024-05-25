@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation project(":module-shared")
     implementation project(":module-repository")
 
     implementation "org.modelmapper:modelmapper:3.0.0"

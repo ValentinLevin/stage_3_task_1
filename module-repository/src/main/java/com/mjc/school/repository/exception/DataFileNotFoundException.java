@@ -1,10 +1,8 @@
 package com.mjc.school.repository.exception;
 
-import com.mjc.school.shared.exception.CustomException;
-
 import java.io.Serial;
 
-public class DataFileNotFoundException extends CustomException {
+public class DataFileNotFoundException extends CustomRepositoryRuntimeException {
     @Serial
     private static final long serialVersionUID = 2373539337608624346L;
 

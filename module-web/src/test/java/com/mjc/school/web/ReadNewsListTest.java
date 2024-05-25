@@ -6,8 +6,8 @@ import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.NewsDTO;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.dto.GetNewsListResponseDTO;
-import com.mjc.school.web.exception.IllegalLimitValueException;
-import com.mjc.school.web.exception.IllegalOffsetValueFormatException;
+import com.mjc.school.web.exception.IllegalLimitValueWebException;
+import com.mjc.school.web.exception.IllegalOffsetValueWebException;
 import com.mjc.school.web.servlet.NewsServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +28,7 @@ class ReadNewsListTest {
     private NewsService newsService;
     private HttpServletRequest request;
     private HttpServletResponse response;
+
     private final ObjectMapper mapper = new JsonMapper().findAndRegisterModules();
     private ByteArrayOutputStream responseBodyStream;
     private final List<NewsDTO> news = List.of(
@@ -72,7 +73,6 @@ class ReadNewsListTest {
         PrintWriter printWriter = new PrintWriter(responseBodyStream);
         Mockito.when(response.getWriter()).thenReturn(printWriter);
 
-        Mockito.when(newsService.findAll()).thenReturn(news);
         Mockito.when(newsService.findAll(Mockito.anyLong(), Mockito.anyLong())).thenReturn(news);
         Mockito.when(newsService.count()).thenReturn(10L);
     }
@@ -103,6 +103,8 @@ class ReadNewsListTest {
         Mockito.when(request.getParameter("limit")).thenReturn(String.valueOf(limit));
         Mockito.when(request.getParameter("offset")).thenReturn(String.valueOf(offset));
 
+        Mockito.when(newsService.count()).thenReturn(10L);
+
         new NewsServlet(newsService).service(request, response);
 
         Mockito.verify(newsService).findAll(offset, limit);
@@ -123,7 +125,7 @@ class ReadNewsListTest {
 
         GetNewsListResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), GetNewsListResponseDTO.class);
 
-        IllegalLimitValueException expectedException = new IllegalLimitValueException(limit);
+        IllegalLimitValueWebException expectedException = new IllegalLimitValueWebException(limit);
 
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 
@@ -135,13 +137,14 @@ class ReadNewsListTest {
     @DisplayName("Invalid offset value. Checking that HttpStatus and errorCode match the values from the IllegalOffsetValueException")
     void incorrectOffsetValue() throws ServletException, IOException {
         int offset = -1;
+        Mockito.when(request.getParameter("limit")).thenReturn("1");
         Mockito.when(request.getParameter("offset")).thenReturn(String.valueOf(offset));
 
         new NewsServlet(newsService).service(request, response);
 
         GetNewsListResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), GetNewsListResponseDTO.class);
 
-        IllegalOffsetValueFormatException expectedException = new IllegalOffsetValueFormatException(offset);
+        IllegalOffsetValueWebException expectedException = new IllegalOffsetValueWebException(offset);
 
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 

@@ -1,13 +1,15 @@
 package com.mjc.school.service.service;
 
-import com.mjc.school.service.dto.EditNewsRequestDTO;
-import com.mjc.school.service.exception.AuthorNotFoundException;
-import com.mjc.school.service.exception.DTOValidationException;
+import com.mjc.school.repository.exception.CustomRepositoryException;
 import com.mjc.school.repository.exception.EntityNotFoundException;
-import com.mjc.school.service.exception.NewsNotFoundException;
 import com.mjc.school.repository.model.Author;
 import com.mjc.school.repository.model.News;
 import com.mjc.school.repository.repository.Repository;
+import com.mjc.school.service.dto.EditNewsRequestDTO;
+import com.mjc.school.service.exception.AuthorNotFoundException;
+import com.mjc.school.service.exception.CustomServiceException;
+import com.mjc.school.service.exception.DTOValidationException;
+import com.mjc.school.service.exception.NewsNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,7 @@ class NewsServiceUpdateNewsTest {
 
     @Test
     @DisplayName("Checking the news data submitted for saving to the repository, generated on the basis of an incoming request")
-    void update_checkEntityToSave() {
+    void update_checkEntityToSave() throws CustomRepositoryException, CustomServiceException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "Changed title",
                 "Changed contend",
@@ -80,7 +82,7 @@ class NewsServiceUpdateNewsTest {
 
     @Test
     @DisplayName("Cases of correctness of news data. No exception should be thrown")
-    void correctData_noThrownExceptions() {
+    void correctData_noThrownExceptions() throws CustomRepositoryException {
         Long newsIdForChange = 1L;
 
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
@@ -125,7 +127,7 @@ class NewsServiceUpdateNewsTest {
 
     @Test
     @DisplayName("If a news title is too short, a DTOValidationException will be thrown when calling the update method.")
-    void update_titleTooShort_throwsDTOValidateException() {
+    void update_titleTooShort_throwsDTOValidateException() throws CustomRepositoryException {
         Long newsIdForUpdate = 1L;
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "12",
@@ -138,7 +140,7 @@ class NewsServiceUpdateNewsTest {
 
     @Test
     @DisplayName("If the news title is too long, a DTOValidationException will be thrown when calling the update method.")
-    void update_titleTooLong_throwsDTOValidateException() {
+    void update_titleTooLong_throwsDTOValidateException() throws CustomRepositoryException {
         Long newsIdForUpdate = 1L;
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "1234567890123456789012345678901", // 31
@@ -151,7 +153,7 @@ class NewsServiceUpdateNewsTest {
 
     @Test
     @DisplayName("If the news content is too long, a DTOValidationException will be thrown when calling the update method.")
-    void update_contentTooLong_throwsDTOValidateException() {
+    void update_contentTooLong_throwsDTOValidateException() throws CustomRepositoryException {
         Long newsIdForUpdate = 1L;
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+ // 100 per line
@@ -166,7 +168,7 @@ class NewsServiceUpdateNewsTest {
 
     @Test
     @DisplayName("If a news content is too short, a DTOValidationException will be thrown when calling the update method.")
-    void update_contentTooShort_throwsDTOValidateException() {
+    void update_contentTooShort_throwsDTOValidateException() throws CustomRepositoryException {
         Long newsIdForUpdate = 1L;
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "News title",
@@ -179,7 +181,7 @@ class NewsServiceUpdateNewsTest {
 
     @Test
     @DisplayName("When passing an incorrect id for a new author, an AuthorNotFoundException will be thrown")
-    void update_notFoundNewAuthor_throwsDTOValidateException() {
+    void update_notFoundNewAuthor_throwsDTOValidateException() throws CustomRepositoryException {
         Long newsIdForUpdate = 1L;
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "News title",
@@ -192,7 +194,7 @@ class NewsServiceUpdateNewsTest {
 
     @Test
     @DisplayName("When passing the id of a non-existent news, a NewsNotFoundException will be thrown")
-    void update_notFoundNewsById_throwsEntityNotFoundException() {
+    void update_notFoundNewsById_throwsEntityNotFoundException() throws CustomRepositoryException {
         Long newsIdForUpdate = 1L;
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "News title",

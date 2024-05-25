@@ -1,6 +1,7 @@
 package com.mjc.school.repository.repository;
 
 import com.mjc.school.repository.datasource.DataSource;
+import com.mjc.school.repository.exception.CustomRepositoryException;
 import com.mjc.school.repository.exception.EntityNullReferenceException;
 import com.mjc.school.repository.exception.EntityValidationException;
 import com.mjc.school.repository.exception.KeyNullReferenceException;
@@ -26,7 +27,7 @@ class AuthorRepositoryTest {
 
     @Test
     @DisplayName("When requesting the author by id, the required dataSource method was called")
-    void findById_foundEntity() {
+    void findById_foundEntity() throws CustomRepositoryException {
         Author expectedAuthor = new Author(1L, "Author 1 name");
         Mockito.when(dataSource.findById(1L)).thenReturn(expectedAuthor);
 
@@ -39,7 +40,7 @@ class AuthorRepositoryTest {
 
     @Test
     @DisplayName("When a deletion request is made, the required dataSource method will be called")
-    void delete_ByEntity() {
+    void delete_ByEntity() throws CustomRepositoryException {
         Author authorForDelete = new Author(1L, "Author 1 name");
         Mockito.doReturn(true).when(dataSource).delete(1L);
 
@@ -74,7 +75,7 @@ class AuthorRepositoryTest {
     }
 
     @Test
-    void authorNameTooSmall_throwsEntityValidationException() {
+    void authorNameTooSmall_throwsEntityValidationException() throws CustomRepositoryException {
         Author author = new Author(1L, "12");
         Mockito.doReturn(author).when(dataSource).save(author);
         assertThatThrownBy(() -> repository.save(author)).isInstanceOf(EntityValidationException.class);

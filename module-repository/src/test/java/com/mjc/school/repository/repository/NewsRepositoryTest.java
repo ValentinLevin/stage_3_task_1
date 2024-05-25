@@ -1,6 +1,7 @@
 package com.mjc.school.repository.repository;
 
 import com.mjc.school.repository.datasource.DataSource;
+import com.mjc.school.repository.exception.CustomRepositoryException;
 import com.mjc.school.repository.exception.EntityNullReferenceException;
 import com.mjc.school.repository.exception.EntityValidationException;
 import com.mjc.school.repository.exception.KeyNullReferenceException;
@@ -28,7 +29,7 @@ class NewsRepositoryTest {
 
     @Test
     @DisplayName("When requesting news by id, the required dataSource method was called")
-    void findById_foundEntity() {
+    void findById_foundEntity() throws CustomRepositoryException {
         News expectedNews =
                 new News(
                         1L,
@@ -49,7 +50,7 @@ class NewsRepositoryTest {
 
     @Test
     @DisplayName("When a deletion request is made, the required dataSource method will be called")
-    void delete_ByEntity() {
+    void delete_ByEntity() throws CustomRepositoryException {
         News newsForDelete =
                 new News(
                         1L,
@@ -93,7 +94,7 @@ class NewsRepositoryTest {
 
     @Test
     @DisplayName("If the entity field values are incorrect, throw an EntityValidationException")
-    void authorTitleAndContentNotValidated_throwsEntityValidationException() {
+    void authorTitleAndContentNotValidated_throwsEntityValidationException() throws CustomRepositoryException {
         News news = new News(
                 1L,
                 "12",
@@ -104,10 +105,5 @@ class NewsRepositoryTest {
         );
         Mockito.doReturn(news).when(dataSource).save(news);
         assertThatThrownBy(() -> repository.save(news)).isInstanceOf(EntityValidationException.class);
-    }
-
-    @Test
-    void testOffset() {
-
     }
 }

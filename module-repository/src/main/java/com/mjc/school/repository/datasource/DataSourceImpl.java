@@ -58,7 +58,7 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
     }
 
     @Override
-    public T findById(Long id) {
+    public T findById(Long id) throws KeyNullReferenceException, EntityNotFoundException {
         if (id == null) {
             throw new KeyNullReferenceException();
         }
@@ -106,7 +106,7 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
     }
 
     @Override
-    public T save(T value) {
+    public T save(T value) throws EntityNullReferenceException {
         if (value == null) {
             throw new EntityNullReferenceException();
         }
@@ -130,7 +130,7 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public boolean delete(Long id) throws KeyNullReferenceException, EntityNotFoundException {
         if (id == null) {
             throw new KeyNullReferenceException();
         }
@@ -158,7 +158,7 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
     }
 
     @Override
-    public boolean existsById(Long id) {
+    public boolean existsById(Long id) throws KeyNullReferenceException {
         if (id == null) {
             throw new KeyNullReferenceException();
         }

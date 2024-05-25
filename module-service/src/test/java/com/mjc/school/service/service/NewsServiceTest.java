@@ -1,12 +1,15 @@
 package com.mjc.school.service.service;
 
-import com.mjc.school.service.dto.AuthorDTO;
-import com.mjc.school.service.dto.NewsDTO;
+import com.mjc.school.repository.exception.CustomRepositoryException;
 import com.mjc.school.repository.exception.EntityNotFoundException;
-import com.mjc.school.service.exception.NewsNotFoundException;
+import com.mjc.school.repository.exception.KeyNullReferenceException;
 import com.mjc.school.repository.model.Author;
 import com.mjc.school.repository.model.News;
 import com.mjc.school.repository.repository.Repository;
+import com.mjc.school.service.dto.AuthorDTO;
+import com.mjc.school.service.dto.NewsDTO;
+import com.mjc.school.service.exception.CustomServiceException;
+import com.mjc.school.service.exception.NewsNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +35,7 @@ class NewsServiceTest {
 
     @Test
     @DisplayName("Checking the response to a single news request")
-    void findById_exists_true() {
+    void findById_exists_true() throws CustomServiceException, CustomRepositoryException {
         Author author = new Author(1L, "Author 1 name");
         News news =
                 new News(
@@ -64,14 +67,14 @@ class NewsServiceTest {
 
     @Test
     @DisplayName("If you specify an incorrect news id, a NewsNotFoundException will be thrown")
-    void findById_exists_false() {
+    void findById_exists_false() throws KeyNullReferenceException, EntityNotFoundException {
         Mockito.when(newsRepository.findById(1L)).thenThrow(EntityNotFoundException.class);
         assertThatThrownBy(() -> newsService.findById(1L)).isInstanceOf(NewsNotFoundException.class);
     }
 
     @Test
     @DisplayName("The correct ID was sent. Execution without errors")
-    void deleteById_exists() {
+    void deleteById_exists() throws CustomServiceException, CustomRepositoryException {
         Long idForDelete = 1L;
         boolean expectedDeleteResult = true;
 
@@ -90,7 +93,7 @@ class NewsServiceTest {
 
     @Test
     @DisplayName("The incorrect ID was sent. The delete method will throw NewsNotFoundException")
-    void deleteById_notExists() {
+    void deleteById_notExists() throws CustomRepositoryException {
         long idForDelete = 1L;
         Mockito.when(newsRepository.deleteById(idForDelete)).thenThrow(EntityNotFoundException.class);
         assertThatThrownBy(() -> newsService.deleteById(idForDelete)).isInstanceOf(NewsNotFoundException.class);

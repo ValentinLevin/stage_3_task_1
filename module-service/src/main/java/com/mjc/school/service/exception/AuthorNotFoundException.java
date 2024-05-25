@@ -1,8 +1,6 @@
 package com.mjc.school.service.exception;
 
-import com.mjc.school.shared.exception.CustomException;
-
-public class AuthorNotFoundException extends CustomException {
+public class AuthorNotFoundException extends CustomServiceException {
     private static final String MESSAGE_TEMPLATE = "Author with id %d not found";
 
     public AuthorNotFoundException(long id) {

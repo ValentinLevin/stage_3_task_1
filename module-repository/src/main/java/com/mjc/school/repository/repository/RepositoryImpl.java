@@ -1,6 +1,7 @@
 package com.mjc.school.repository.repository;
 
 import com.mjc.school.repository.datasource.DataSource;
+import com.mjc.school.repository.exception.EntityNotFoundException;
 import com.mjc.school.repository.exception.EntityNullReferenceException;
 import com.mjc.school.repository.exception.EntityValidationException;
 import com.mjc.school.repository.exception.KeyNullReferenceException;
@@ -29,7 +30,7 @@ class RepositoryImpl<T extends Entity> implements Repository<T>{
     }
 
     @Override
-    public T findById(Long id) {
+    public T findById(Long id) throws KeyNullReferenceException, EntityNotFoundException {
         if (id == null) {
             throw new KeyNullReferenceException();
         }
@@ -37,7 +38,7 @@ class RepositoryImpl<T extends Entity> implements Repository<T>{
     }
 
     @Override
-    public T save(T entity) {
+    public T save(T entity) throws EntityNullReferenceException, EntityValidationException {
         if (entity == null) {
             throw new EntityNullReferenceException();
         }
@@ -48,7 +49,7 @@ class RepositoryImpl<T extends Entity> implements Repository<T>{
     }
 
     @Override
-    public boolean delete(T entity) {
+    public boolean delete(T entity) throws EntityNullReferenceException, KeyNullReferenceException, EntityNotFoundException {
         if (entity == null) {
             throw new EntityNullReferenceException();
         }
@@ -56,7 +57,7 @@ class RepositoryImpl<T extends Entity> implements Repository<T>{
     }
 
     @Override
-    public boolean deleteById(Long id) {
+    public boolean deleteById(Long id) throws KeyNullReferenceException, EntityNotFoundException {
         if (id == null) {
             throw new KeyNullReferenceException();
         }
@@ -74,7 +75,7 @@ class RepositoryImpl<T extends Entity> implements Repository<T>{
     }
 
     @Override
-    public boolean existsById(Long id) {
+    public boolean existsById(Long id) throws KeyNullReferenceException {
         return this.dataSource.existsById(id);
     }
 
@@ -83,7 +84,7 @@ class RepositoryImpl<T extends Entity> implements Repository<T>{
         return this.dataSource.count();
     }
 
-    private void validateEntity(T entity) {
+    private void validateEntity(T entity) throws EntityValidationException {
         Set<ConstraintViolation<T>> violations = validator.validate(entity);
         if (!violations.isEmpty()) {
             String messages = violations.stream()

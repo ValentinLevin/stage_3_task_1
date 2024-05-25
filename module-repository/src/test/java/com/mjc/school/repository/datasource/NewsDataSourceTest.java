@@ -1,5 +1,6 @@
 package com.mjc.school.repository.datasource;
 
+import com.mjc.school.repository.exception.CustomRepositoryException;
 import com.mjc.school.repository.exception.EntityNotFoundException;
 import com.mjc.school.repository.model.News;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +58,7 @@ class NewsDataSourceTest {
 
     @Test
     @DisplayName("When an entity is deleted, it is deleted from the dataSource")
-    void delete_checkNotExistsInDataSource() {
+    void delete_checkNotExistsInDataSource() throws CustomRepositoryException {
         Long idToDelete = findRandomId();
 
         dataSource.findById(idToDelete);
@@ -72,7 +73,7 @@ class NewsDataSourceTest {
 
     @Test
     @DisplayName("When an entity is added, it is saved in the dataset")
-    void add_checkExistsInDataSource() {
+    void add_checkExistsInDataSource() throws CustomRepositoryException {
         News expectedEntity = new News();
 
         expectedEntity.setTitle("New title");
@@ -96,7 +97,7 @@ class NewsDataSourceTest {
 
     @Test
     @DisplayName("When the data is changed, the changes are saved in the dataset")
-    void save_update_savedEntityIsEqualsToFetchedEntity_true() {
+    void save_update_savedEntityIsEqualsToFetchedEntity_true() throws CustomRepositoryException {
         long idToChange = findRandomId();
         News expectedEntity = dataSource.findById(idToChange);
         expectedEntity.setTitle("Changed title");
@@ -121,7 +122,7 @@ class NewsDataSourceTest {
 
     @Test
     @DisplayName("When changing the data of an entity issued by a dataSource, the entity data in the dataSource does not change")
-    void save_update_OnSavingAndFetchingNewInstanceOfEntityCreatedNotDependOfEachOther_true() {
+    void save_update_OnSavingAndFetchingNewInstanceOfEntityCreatedNotDependOfEachOther_true() throws CustomRepositoryException {
         Long idForCheck = findRandomId();
 
         News firstFetchEntity = dataSource.findById(idForCheck);
@@ -139,7 +140,7 @@ class NewsDataSourceTest {
 
     @Test
     @DisplayName("When trying to search by an existing id, an entity with the corresponding id will be returned")
-    void findById_found() {
+    void findById_found() throws CustomRepositoryException {
         Long idForFetch = findRandomId();
         News news = dataSource.findById(idForFetch);
         assertThat(news).isNotNull().extracting("id").isEqualTo(news.getId());

@@ -1,8 +1,6 @@
 package com.mjc.school.service.exception;
 
-import com.mjc.school.shared.exception.CustomException;
-
-public class DTOValidationException extends CustomException {
+public class DTOValidationException extends CustomServiceException {
     private static final String MESSAGE_TEMPLATE = "The following errors were detected during the check: %s";
 
     public DTOValidationException(String constrainViolations) {

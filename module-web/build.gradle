@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation project (":module-shared")
     implementation project (":module-service")
 
     implementation "jakarta.servlet:jakarta.servlet-api"

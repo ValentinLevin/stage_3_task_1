@@ -1,11 +1,14 @@
 package com.mjc.school.repository.datasource;
 
+import com.mjc.school.repository.exception.EntityNotFoundException;
+import com.mjc.school.repository.exception.EntityNullReferenceException;
+import com.mjc.school.repository.exception.KeyNullReferenceException;
 import com.mjc.school.repository.model.Entity;
 
 import java.util.List;
 
 public interface DataSource <T extends Entity> {
-    T findById(Long id);
+    T findById(Long id) throws KeyNullReferenceException, EntityNotFoundException;
     List<T> findAll();
 
     /**
@@ -15,8 +18,8 @@ public interface DataSource <T extends Entity> {
      */
     List<T> findAll(long offset, long limit);
 
-    T save(T value);
-    boolean delete(Long id);
+    T save(T value) throws EntityNullReferenceException;
+    boolean delete(Long id) throws KeyNullReferenceException, EntityNotFoundException;
     long count();
-    boolean existsById(Long id);
+    boolean existsById(Long id) throws KeyNullReferenceException;
 }

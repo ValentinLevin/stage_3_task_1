@@ -2,13 +2,14 @@ package com.mjc.school.service.service;
 
 import com.mjc.school.service.dto.EditNewsRequestDTO;
 import com.mjc.school.service.dto.NewsDTO;
+import com.mjc.school.service.exception.*;
 
 import java.util.List;
 
 public interface NewsService {
-    NewsDTO add(EditNewsRequestDTO newsDTO);
-    NewsDTO update(Long newsId, EditNewsRequestDTO newsDTO);
-    NewsDTO findById(long id);
+    NewsDTO add(EditNewsRequestDTO newsDTO) throws DTOValidationException, AuthorNotFoundException, NullAuthorIdException, NewsNotFoundException, NullNewsIdException;
+    NewsDTO update(Long newsId, EditNewsRequestDTO newsDTO) throws DTOValidationException, NullNewsIdException, NewsNotFoundException, NullAuthorIdException, AuthorNotFoundException;
+    NewsDTO findById(long id) throws NullNewsIdException, NewsNotFoundException, NullAuthorIdException, AuthorNotFoundException;
     List<NewsDTO> findAll();
 
     /**
@@ -17,6 +18,6 @@ public interface NewsService {
      * @return list of news
      */
     List<NewsDTO> findAll(long offset, long limit);
-    boolean deleteById(long id);
+    boolean deleteById(long id) throws NullNewsIdException, NewsNotFoundException;
     long count();
 }
