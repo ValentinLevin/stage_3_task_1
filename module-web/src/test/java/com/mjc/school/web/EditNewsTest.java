@@ -1,12 +1,19 @@
 package com.mjc.school.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.EditNewsRequestDTO;
 import com.mjc.school.service.dto.NewsDTO;
+import com.mjc.school.service.exception.AuthorNotFoundException;
 import com.mjc.school.service.exception.CustomServiceException;
+import com.mjc.school.service.exception.DTOValidationException;
+import com.mjc.school.service.exception.NewsNotFoundException;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.dto.AddNewsResponseDTO;
-import com.mjc.school.web.servlet.NewsServlet;
+import com.mjc.school.web.dto.BaseResponseDTO;
+import com.mjc.school.web.exception.*;
+import com.mjc.school.web.servlet.NewsItemServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +31,7 @@ public class EditNewsTest {
     private HttpServletRequest request;
     private HttpServletResponse response;
     private NewsService newsService;
-
+    private ObjectMapper mapper = new JsonMapper().findAndRegisterModules();
     private ByteArrayOutputStream responseBodyStream;
 
     @BeforeEach
@@ -33,7 +40,7 @@ public class EditNewsTest {
         request = Mockito.mock(HttpServletRequest.class);
         response = Mockito.mock(HttpServletResponse.class);
 
-        Mockito.when(request.getMethod()).thenReturn("POST");
+        Mockito.when(request.getMethod()).thenReturn("PUT");
 
         responseBodyStream = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(responseBodyStream);
@@ -57,35 +64,38 @@ public class EditNewsTest {
 
         Mockito.when(request.getReader()).thenReturn(reader);
 
-        EditNewsRequestDTO exceptedRequestDTO = new EditNewsRequestDTO(
+        EditNewsRequestDTO expectedRequestDTO = new EditNewsRequestDTO(
                 "News title",
                 "News content",
                 12L
         );
 
-        Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
-        Mockito.when(newsService.findById(idForUpdate)).thenReturn();
-
-        NewsDTO createdNews = new NewsDTO(
-                123L,
-                exceptedRequestDTO.getTitle(),
-                exceptedRequestDTO.getContent(),
-                "",
-                "",
-                new AuthorDTO(exceptedRequestDTO.getAuthorId(), "")
+        NewsDTO newsDTO = new NewsDTO(
+                idForUpdate,
+                expectedRequestDTO.getTitle(),
+                expectedRequestDTO.getContent(),
+                new AuthorDTO(
+                        expectedRequestDTO.getAuthorId(),
+                        ""
+                )
         );
-        Mockito.when(newsService.add(Mockito.any(EditNewsRequestDTO.class))).thenReturn(createdNews);
 
-        new NewsServlet(newsService).service(request, response);
+        Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
+        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenReturn(newsDTO);
+
+        new NewsItemServlet(newsService).service(request, response);
 
         ArgumentCaptor<EditNewsRequestDTO> editNewsRequestDTOArgumentCaptor = ArgumentCaptor.forClass(EditNewsRequestDTO.class);
-        Mockito.verify(newsService).add(editNewsRequestDTOArgumentCaptor.capture());
+        ArgumentCaptor<Long> idArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        Mockito.verify(newsService).update(idArgumentCaptor.capture(), editNewsRequestDTOArgumentCaptor.capture());
 
         EditNewsRequestDTO actualRequestDTO = editNewsRequestDTOArgumentCaptor.getValue();
+        long actualIdForUpdate = idArgumentCaptor.getValue();
 
-        assertThat(actualRequestDTO).isEqualTo(exceptedRequestDTO);
-        Mockito.verify(response).setStatus(HttpServletResponse.SC_CREATED);
-        Mockito.verify(response).addHeader("Location", "/news/" + createdNews.getId());
+        assertThat(actualRequestDTO).isEqualTo(expectedRequestDTO);
+        assertThat(actualIdForUpdate).isEqualTo(idForUpdate);
+
+        Mockito.verify(response).setStatus(HttpServletResponse.SC_OK);
 
         assertThat(responseBodyStream.size()).isNotZero();
         AddNewsResponseDTO responseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
@@ -96,10 +106,149 @@ public class EditNewsTest {
                 .isNotNull()
                 .extracting("title", "content", "author.id")
                 .containsExactly(
-                        exceptedRequestDTO.getTitle(),
-                        exceptedRequestDTO.getContent(),
-                        exceptedRequestDTO.getAuthorId()
+                        expectedRequestDTO.getTitle(),
+                        expectedRequestDTO.getContent(),
+                        expectedRequestDTO.getAuthorId()
                 );
     }
 
+    @Test()
+    @DisplayName("News editing. News not found.")
+    void edit_notFound() throws IOException, CustomServiceException, ServletException {
+        long idForUpdate = 123L;
+
+        String requestBody =
+                "{ " +
+                        "\"title\" : \"News title\", " +
+                        "\"content\": \"News content\", " +
+                        "\"authorId\": 12" +
+                        "}";
+
+        StringReader stringReader = new StringReader(requestBody);
+        BufferedReader reader = new BufferedReader(stringReader);
+
+        Mockito.when(request.getReader()).thenReturn(reader);
+
+        Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
+        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(new NewsNotFoundException(idForUpdate));
+
+        NewsNotFoundWebException expectedException = new NewsNotFoundWebException(idForUpdate);
+
+        new NewsItemServlet(newsService).service(request, response);
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(responseBodyStream.size()).isNotZero();
+
+        BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
+
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
+    }
+
+    @Test
+    @DisplayName("News editing. Author not found")
+    void newsEditing_AuthorNotFound() throws IOException, ServletException, CustomServiceException {
+        long idForUpdate = 123L;
+
+        String requestBody =
+                "{ " +
+                        "\"title\" : \"News title\", " +
+                        "\"content\": \"News content\", " +
+                        "\"authorId\": 12" +
+                        "}";
+
+        StringReader stringReader = new StringReader(requestBody);
+        BufferedReader reader = new BufferedReader(stringReader);
+
+        Mockito.when(request.getReader()).thenReturn(reader);
+        Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
+        AuthorNotFoundException authorNotFoundException = new AuthorNotFoundException(12);
+        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(authorNotFoundException);
+
+        AuthorNotFoundWebException expectedException = new AuthorNotFoundWebException(12);
+
+        new NewsItemServlet(newsService).service(request, response);
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(responseBodyStream.size()).isNotZero();
+
+        BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
+
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
+    }
+
+    @Test
+    @DisplayName("News editing. DTO is incorrect")
+    void newsEditing_DTO_is_incorrect() throws IOException, ServletException, CustomServiceException {
+        long idForUpdate = 123L;
+
+        StringReader stringReader = new StringReader("{}");
+        BufferedReader reader = new BufferedReader(stringReader);
+
+        Mockito.when(request.getReader()).thenReturn(reader);
+        Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
+        DTOValidationException validationException = new DTOValidationException("Validation exceptions");
+        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(validationException);
+
+        DataValidationWebException expectedException = new DataValidationWebException(validationException.getMessage());
+
+        new NewsItemServlet(newsService).service(request, response);
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(responseBodyStream.size()).isNotZero();
+
+        BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
+
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
+    }
+
+    @Test
+    @DisplayName("News editing. Empty request body")
+    void newsEditing_emptyRequestBody() throws IOException, ServletException {
+        long idForUpdate = 123L;
+
+        StringReader stringReader = new StringReader("");
+        BufferedReader reader = new BufferedReader(stringReader);
+
+        Mockito.when(request.getReader()).thenReturn(reader);
+        Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
+
+        NoDataInRequestWebException expectedException = new NoDataInRequestWebException();
+
+        new NewsItemServlet(newsService).service(request, response);
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(responseBodyStream.size()).isNotZero();
+
+        BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
+
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
+    }
+
+    @Test
+    @DisplayName("News editing. Runtime exception from service layer")
+    void newsEditing_serviceRuntimeException() throws IOException, ServletException, CustomServiceException {
+        long idForUpdate = 123L;
+
+        StringReader stringReader = new StringReader("{}");
+        BufferedReader reader = new BufferedReader(stringReader);
+
+        Mockito.when(request.getReader()).thenReturn(reader);
+        Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
+        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(new RuntimeException("runtime"));
+
+        CustomWebRuntimeException expectedException = new CustomWebRuntimeException();
+
+        new NewsItemServlet(newsService).service(request, response);
+
+        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(responseBodyStream.size()).isNotZero();
+
+        BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
+
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+    }
 }
