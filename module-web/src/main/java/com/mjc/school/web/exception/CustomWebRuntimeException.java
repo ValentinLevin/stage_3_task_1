@@ -1,6 +1,6 @@
 package com.mjc.school.web.exception;
 
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
@@ -16,7 +16,7 @@ public class CustomWebRuntimeException extends RuntimeException {
         return HTTP_STATUS;
     }
 
-    public ERROR_CODE getErrorCode() {
-        return ERROR_CODE.UNEXPECTED_ERROR;
+    public RESULT_CODE getErrorCode() {
+        return RESULT_CODE.UNEXPECTED_ERROR;
     }
 }

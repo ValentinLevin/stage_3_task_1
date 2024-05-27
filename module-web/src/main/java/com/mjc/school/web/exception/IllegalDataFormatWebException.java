@@ -1,6 +1,6 @@
 package com.mjc.school.web.exception;
 
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
@@ -10,7 +10,7 @@ public class IllegalDataFormatWebException extends CustomWebException {
 
     public IllegalDataFormatWebException(String data) {
         super(
-                ERROR_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
                 String.format(MESSAGE_TEMPLATE_WITH_DATA, data),
                 HTTP_STATUS
         );

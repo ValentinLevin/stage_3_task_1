@@ -7,7 +7,7 @@ import com.mjc.school.service.dto.NewsDTO;
 import com.mjc.school.service.exception.CustomServiceException;
 import com.mjc.school.service.exception.NewsNotFoundServiceException;
 import com.mjc.school.service.service.NewsService;
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 import com.mjc.school.web.dto.BaseResponseDTO;
 import com.mjc.school.web.dto.GetNewsItemResponseDTO;
 import com.mjc.school.web.exception.IllegalAuthorIdValueWebException;
@@ -72,7 +72,7 @@ class GetNewsByIdTest {
 
         assertThat(responseBodyStream.size()).isNotZero();
         GetNewsItemResponseDTO actualResponse = mapper.readValue(responseBodyStream.toByteArray(), GetNewsItemResponseDTO.class);
-        assertThat(actualResponse.getErrorCode()).isEqualTo(ERROR_CODE.NO_ERROR.getId());
+        assertThat(actualResponse.getErrorCode()).isEqualTo(RESULT_CODE.GET_SUCCESS.getErrorCode());
         assertThat(actualResponse.getData())
                 .isNotNull()
                 .isEqualTo(newsDTO);
@@ -92,7 +92,7 @@ class GetNewsByIdTest {
 
         assertThat(responseBodyStream.size()).isNotZero();
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
     }
 
     @Test
@@ -108,6 +108,6 @@ class GetNewsByIdTest {
 
         assertThat(responseBodyStream.size()).isNotZero();
         GetNewsItemResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), GetNewsItemResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
     }
 }

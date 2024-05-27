@@ -1,6 +1,6 @@
 package com.mjc.school.web.exception;
 
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
@@ -10,7 +10,7 @@ public class IllegalNewsIdValueWebException extends CustomWebException {
 
     public IllegalNewsIdValueWebException(String idValue) {
         super(
-                ERROR_CODE.ILLEGAL_ID_VALUE,
+                RESULT_CODE.ILLEGAL_ID_VALUE,
                 String.format(MESSAGE_TEMPLATE, idValue),
                 HTTP_STATUS
         );

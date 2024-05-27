@@ -119,7 +119,7 @@ class AddNewNewsTest {
         NoDataInRequestWebException expectedException = new NoDataInRequestWebException();
 
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 
@@ -146,7 +146,7 @@ class AddNewNewsTest {
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 
         AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
     }
 
     @Test
@@ -165,7 +165,7 @@ class AddNewNewsTest {
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 
         AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
     }
 
     @Test
@@ -191,6 +191,6 @@ class AddNewNewsTest {
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 
         AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
     }
 }

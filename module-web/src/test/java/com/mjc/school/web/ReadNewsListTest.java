@@ -129,7 +129,7 @@ class ReadNewsListTest {
 
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 
@@ -148,7 +148,7 @@ class ReadNewsListTest {
 
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 }

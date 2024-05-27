@@ -5,8 +5,9 @@ import lombok.Getter;
 import static jakarta.servlet.http.HttpServletResponse.*;
 
 @Getter
-public enum ERROR_CODE {
-    NO_ERROR(0, SC_OK),
+public enum RESULT_CODE {
+    SUCCESS(0, SC_OK),
+    ADD_SUCCESS(0, SC_CREATED),
     UNEXPECTED_ERROR(1, SC_INTERNAL_SERVER_ERROR),
     NEWS_NOT_FOUND(2, SC_NOT_FOUND),
     AUTHOR_NOT_FOUND(3, SC_BAD_REQUEST),
@@ -15,11 +16,15 @@ public enum ERROR_CODE {
     DATA_VALIDATION(6, SC_BAD_REQUEST),
     ILLEGAL_ID_VALUE(7, SC_BAD_REQUEST);
 
-    private final int id;
+    private final int errorCode;
     private final int httpStatus;
 
-    ERROR_CODE(int id, int httpStatus) {
-        this.id = id;
+    public boolean isSuccess() {
+        return this == SUCCESS;
+    }
+
+    RESULT_CODE(int errorCode, int httpStatus) {
+        this.errorCode = errorCode;
         this.httpStatus = httpStatus;
     }
 }

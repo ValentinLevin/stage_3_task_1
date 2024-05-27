@@ -1,6 +1,6 @@
 package com.mjc.school.web.exception;
 
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
@@ -10,7 +10,7 @@ public class NotUTFEncodingWebException extends CustomWebException {
 
     public NotUTFEncodingWebException() {
         super(
-                ERROR_CODE.REQUEST_IS_NOT_IN_UTF_ENCODING,
+                RESULT_CODE.REQUEST_IS_NOT_IN_UTF_ENCODING,
                 MESSAGE_TEMPLATE,
                 HTTP_STATUS
         );

@@ -141,7 +141,7 @@ class EditNewsTest {
 
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 
@@ -174,7 +174,7 @@ class EditNewsTest {
 
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 
@@ -200,7 +200,7 @@ class EditNewsTest {
 
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 
@@ -224,7 +224,7 @@ class EditNewsTest {
 
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 
@@ -249,6 +249,6 @@ class EditNewsTest {
 
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
     }
 }

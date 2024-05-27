@@ -1,6 +1,6 @@
 package com.mjc.school.web.exception;
 
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
@@ -10,7 +10,7 @@ public class AuthorNotFoundWebException extends CustomWebException {
 
     public AuthorNotFoundWebException(long id) {
         super(
-                ERROR_CODE.AUTHOR_NOT_FOUND,
+                RESULT_CODE.AUTHOR_NOT_FOUND,
                 String.format(MESSAGE_TEMPLATE, id),
                 HTTP_STATUS
         );

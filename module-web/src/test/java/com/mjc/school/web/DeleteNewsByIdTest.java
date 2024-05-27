@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.service.exception.CustomServiceException;
 import com.mjc.school.service.exception.NewsNotFoundServiceException;
 import com.mjc.school.service.service.NewsService;
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 import com.mjc.school.web.dto.BaseResponseDTO;
 import com.mjc.school.web.exception.IllegalAuthorIdValueWebException;
 import com.mjc.school.web.exception.NewsNotFoundWebException;
@@ -57,7 +57,7 @@ class DeleteNewsByIdTest {
         Mockito.verify(response).setStatus(HttpServletResponse.SC_OK);
 
         BaseResponseDTO actualResponse = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
-        assertThat(actualResponse.getErrorCode()).isEqualTo(ERROR_CODE.NO_ERROR.getId());
+        assertThat(actualResponse.getErrorCode()).isEqualTo(RESULT_CODE.GET_SUCCESS.getErrorCode());
     }
 
     @Test
@@ -74,7 +74,7 @@ class DeleteNewsByIdTest {
 
         assertThat(responseBodyStream.size()).isNotZero();
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
     }
 
     @Test
@@ -90,6 +90,6 @@ class DeleteNewsByIdTest {
 
         assertThat(responseBodyStream.size()).isNotZero();
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getId());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
     }
 }

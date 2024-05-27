@@ -1,6 +1,6 @@
 package com.mjc.school.web.exception;
 
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
@@ -10,7 +10,7 @@ public class NoDataInRequestWebException extends CustomWebException {
 
     public NoDataInRequestWebException() {
         super(
-                ERROR_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
                 MESSAGE_TEMPLATE,
                 HTTP_STATUS
         );

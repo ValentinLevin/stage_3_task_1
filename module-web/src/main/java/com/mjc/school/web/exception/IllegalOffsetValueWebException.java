@@ -1,6 +1,6 @@
 package com.mjc.school.web.exception;
 
-import com.mjc.school.web.constant.ERROR_CODE;
+import com.mjc.school.web.constant.RESULT_CODE;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
@@ -12,7 +12,7 @@ public class IllegalOffsetValueWebException extends CustomWebException {
 
     public IllegalOffsetValueWebException(String offsetValue) {
         super(
-                ERROR_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
                 String.format(INVALID_FORMAT_MESSAGE_TEMPLATE, offsetValue),
                 HTTP_STATUS
         );
@@ -20,7 +20,7 @@ public class IllegalOffsetValueWebException extends CustomWebException {
 
     public IllegalOffsetValueWebException(long offsetValue) {
         super(
-                ERROR_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
                 String.format(INVALID_VALUE_MESSAGE_TEMPLATE, offsetValue),
                 HTTP_STATUS
         );

@@ -14,7 +14,7 @@ public class HttpServletResponseUtils {
 
     private HttpServletResponseUtils() {}
 
-    public static <T> void writePayloadIntoResponseBody(HttpServletResponse response, T value, int status) throws CustomWebRuntimeException {
+    public static <T> void writePayloadIntoResponseBody(HttpServletResponse response, T value, int status) {
         try {
             String valueAsString = mapper.writeValueAsString(value);
 
