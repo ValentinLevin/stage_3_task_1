@@ -155,15 +155,15 @@ class NewsDataSourceTest {
         int offset = 0;
         int limit  = 1;
 
-        List<News> readItems = dataSource.findAll(offset, limit);
+        List<News> actualItems = dataSource.findAll(offset, limit);
 
-        assertThat(readItems).hasSize(limit);
+        assertThat(actualItems).hasSize(limit);
 
         limit  = 2;
 
-        readItems = dataSource.findAll(offset, limit);
+        actualItems = dataSource.findAll(offset, limit);
 
-        assertThat(readItems).hasSize(limit);
+        assertThat(actualItems).hasSize(limit);
     }
 
     @Test

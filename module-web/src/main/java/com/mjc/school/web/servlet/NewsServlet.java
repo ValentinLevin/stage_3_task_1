@@ -25,7 +25,7 @@ import static jakarta.servlet.http.HttpServletResponse.*;
 @WebServlet("/news")
 @Slf4j
 public class NewsServlet extends HttpServlet {
-    private final NewsService newsService;
+    private final transient NewsService newsService;
 
     public NewsServlet(NewsService newsService) {
         this.newsService = newsService;
@@ -84,12 +84,13 @@ public class NewsServlet extends HttpServlet {
             }
 
             HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_CREATED);
-        } catch (CustomWebException e) {
+        } catch (CustomWebException | CustomWebRuntimeException e) {
             BaseResponseDTO responseBody = new BaseResponseDTO(e);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
-        } catch (CustomWebRuntimeException e) {
-            BaseResponseDTO responseBody = new BaseResponseDTO(e);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
+            HttpServletResponseUtils.writePayloadIntoResponseBody(
+                    resp,
+                    responseBody,
+                    e instanceof CustomWebException exception ? exception.getHttpStatus() : ((CustomWebRuntimeException) e).getHttpStatus()
+            );
         }  catch (RuntimeException e) {
             log.error("Error processing a request to add news", e);
             BaseResponseDTO responseBody = new BaseResponseDTO(e);

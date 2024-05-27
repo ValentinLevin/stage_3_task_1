@@ -39,7 +39,7 @@ public class News extends Entity {
     public News() { }
 
     @Override
-    public Object clone() {
+    public News copy() {
         return new News(
                 this.getId(),
                 this.getTitle(),

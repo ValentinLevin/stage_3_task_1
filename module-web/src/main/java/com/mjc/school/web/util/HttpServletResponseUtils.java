@@ -12,6 +12,8 @@ import java.io.PrintWriter;
 public class HttpServletResponseUtils {
     private static final ObjectMapper mapper = new JsonMapper().findAndRegisterModules();
 
+    private HttpServletResponseUtils() {}
+
     public static <T> void writePayloadIntoResponseBody(HttpServletResponse response, T value, int status) throws CustomWebRuntimeException {
         try {
             String valueAsString = mapper.writeValueAsString(value);

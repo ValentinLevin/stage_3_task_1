@@ -22,7 +22,7 @@ import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 @WebServlet("/news/*")
 @Slf4j
 public class NewsItemServlet extends HttpServlet {
-    private final NewsService newsService;
+    private final transient NewsService newsService;
 
     public NewsItemServlet(NewsService newsService) {
         this.newsService = newsService;

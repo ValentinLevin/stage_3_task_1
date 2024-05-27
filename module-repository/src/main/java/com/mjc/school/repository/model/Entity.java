@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class Entity implements Cloneable {
+public abstract class Entity {
     private Long id;
 
     protected Entity() {}
@@ -19,8 +19,5 @@ public abstract class Entity implements Cloneable {
         this.id = id;
     }
 
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        throw new CloneNotSupportedException();
-    }
+    public abstract <T extends Entity> T copy();
 }

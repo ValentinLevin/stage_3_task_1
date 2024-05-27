@@ -57,7 +57,7 @@ public class Author extends Entity {
     }
 
     @Override
-    public Object clone() {
+    public Author copy() {
         return new Author(this.getId(), this.getName());
     }
 }

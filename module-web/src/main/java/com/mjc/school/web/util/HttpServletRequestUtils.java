@@ -16,6 +16,8 @@ import java.util.Optional;
 public class HttpServletRequestUtils {
     private static final ObjectMapper mapper = new JsonMapper().findAndRegisterModules();
 
+    private HttpServletRequestUtils() {}
+
     public static <T> T readObjectFromRequestBody(HttpServletRequest request, Class<T> clazz) throws CustomWebException {
         try {
             request.setCharacterEncoding("UTF-8");
