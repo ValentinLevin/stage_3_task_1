@@ -1,5 +1,6 @@
 plugins {
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 dependencies {
@@ -10,10 +11,18 @@ dependencies {
     implementation 'ch.qos.logback:logback-core:1.5.6'
     implementation 'ch.qos.logback:logback-classic:1.5.6'
 
-    implementation 'org.eclipse.jetty:jetty-server:12.0.8'
-    implementation 'org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.8'
+    implementation 'org.eclipse.jetty:jetty-server:12.0.9'
+    implementation 'org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.9'
 }
 
 application {
-    mainClass = "com.mjc.school.App"
+    mainClass = "com.mjc.school.main.App"
+}
+
+jar {
+    manifest {
+        attributes (
+            'Main-class': 'com.mjc.school.main.App'
+        )
+    }
 }
