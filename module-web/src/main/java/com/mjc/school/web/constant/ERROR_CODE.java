@@ -1,5 +1,8 @@
 package com.mjc.school.web.constant;
 
+import lombok.Getter;
+
+@Getter
 public enum ERROR_CODE {
     NO_ERROR(0),
     UNEXPECTED_ERROR(1),
@@ -11,10 +14,6 @@ public enum ERROR_CODE {
     ILLEGAL_ID_VALUE(7);
 
     private final int id;
-
-    public int getId() {
-        return this.id;
-    }
 
     ERROR_CODE(int id) {
         this.id = id;

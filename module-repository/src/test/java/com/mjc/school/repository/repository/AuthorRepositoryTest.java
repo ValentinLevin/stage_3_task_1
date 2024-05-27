@@ -9,19 +9,23 @@ import com.mjc.school.repository.model.Author;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("AuthorRepository")
+@ExtendWith(MockitoExtension.class)
 class AuthorRepositoryTest {
+    @Mock(strictness = Mock.Strictness.LENIENT)
     private DataSource<Author> dataSource;
     private Repository<Author> repository;
 
     @BeforeEach
     void setup() {
-        dataSource = Mockito.mock(DataSource.class);
         repository = new AuthorRepository(dataSource);
     }
 

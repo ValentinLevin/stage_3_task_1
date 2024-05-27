@@ -21,11 +21,8 @@ class AuthorDataSourceTest {
 
     private Long findRandomId() {
         Random random = new Random(System.currentTimeMillis());
-        return dataSource.findAll().stream()
-                .sorted((item1, item2) -> random.nextInt(3) - 1)
-                .findAny()
-                .map(Author::getId)
-                .orElse(null);
+        List<Author> authors = dataSource.findAll();
+        return authors.get(random.nextInt(authors.size())).getId();
     }
 
     @Test

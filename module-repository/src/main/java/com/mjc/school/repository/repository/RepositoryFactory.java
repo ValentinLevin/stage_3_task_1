@@ -11,6 +11,7 @@ public class RepositoryFactory {
 
     private RepositoryFactory() {}
 
+    @SuppressWarnings("unchecked")
     public static <T extends Entity> Repository<T> getRepository(Class<T> entityClass) {
         if (entityClass == Author.class) {
             DataSource<Author> dataSource = DataSourceFactory.getDataSource(Author.class);

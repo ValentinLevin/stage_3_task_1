@@ -1,9 +1,9 @@
 package com.mjc.school.service.exception;
 
-public class NullNewsIdException extends CustomServiceException {
+public class NullNewsIdServiceException extends CustomServiceException {
     private static final String MESSAGE_TEMPLATE = "Incorrect news id value passed: null";
 
-    public NullNewsIdException() {
+    public NullNewsIdServiceException() {
         super(MESSAGE_TEMPLATE);
     }
 }

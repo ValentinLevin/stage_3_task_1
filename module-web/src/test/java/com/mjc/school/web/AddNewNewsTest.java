@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.EditNewsRequestDTO;
 import com.mjc.school.service.dto.NewsDTO;
+import com.mjc.school.service.exception.AuthorNotFoundServiceException;
 import com.mjc.school.service.exception.CustomServiceException;
-import com.mjc.school.service.exception.DTOValidationException;
+import com.mjc.school.service.exception.DTOValidationServiceException;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.dto.AddNewsResponseDTO;
 import com.mjc.school.web.exception.AuthorNotFoundWebException;
@@ -136,7 +137,7 @@ class AddNewNewsTest {
         BufferedReader bufferedReader = new BufferedReader(reader);
         Mockito.when(request.getReader()).thenReturn(bufferedReader);
 
-        Mockito.when(newsService.add(Mockito.any())).thenThrow(new DTOValidationException(requestBody));
+        Mockito.when(newsService.add(Mockito.any())).thenThrow(new DTOValidationServiceException(requestBody));
 
         DataValidationWebException expectedException = new DataValidationWebException(requestBody);
 
@@ -155,7 +156,7 @@ class AddNewNewsTest {
         BufferedReader bufferedReader = new BufferedReader(reader);
         Mockito.when(request.getReader()).thenReturn(bufferedReader);
 
-        Mockito.when(newsService.add(Mockito.any())).thenThrow(DTOValidationException.class);
+        Mockito.when(newsService.add(Mockito.any())).thenThrow(DTOValidationServiceException.class);
 
         DataValidationWebException expectedException = new DataValidationWebException("");
 
@@ -181,7 +182,7 @@ class AddNewNewsTest {
         BufferedReader bufferedReader = new BufferedReader(reader);
         Mockito.when(request.getReader()).thenReturn(bufferedReader);
 
-        Mockito.when(newsService.add(Mockito.any())).thenThrow(com.mjc.school.service.exception.AuthorNotFoundException.class);
+        Mockito.when(newsService.add(Mockito.any())).thenThrow(AuthorNotFoundServiceException.class);
 
         AuthorNotFoundWebException expectedException = new AuthorNotFoundWebException(0);
 

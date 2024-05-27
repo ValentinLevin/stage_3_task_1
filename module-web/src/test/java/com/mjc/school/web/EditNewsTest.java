@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.EditNewsRequestDTO;
 import com.mjc.school.service.dto.NewsDTO;
-import com.mjc.school.service.exception.AuthorNotFoundException;
+import com.mjc.school.service.exception.AuthorNotFoundServiceException;
 import com.mjc.school.service.exception.CustomServiceException;
-import com.mjc.school.service.exception.DTOValidationException;
-import com.mjc.school.service.exception.NewsNotFoundException;
+import com.mjc.school.service.exception.DTOValidationServiceException;
+import com.mjc.school.service.exception.NewsNotFoundServiceException;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.dto.AddNewsResponseDTO;
 import com.mjc.school.web.dto.BaseResponseDTO;
@@ -31,7 +31,7 @@ public class EditNewsTest {
     private HttpServletRequest request;
     private HttpServletResponse response;
     private NewsService newsService;
-    private ObjectMapper mapper = new JsonMapper().findAndRegisterModules();
+    private final ObjectMapper mapper = new JsonMapper().findAndRegisterModules();
     private ByteArrayOutputStream responseBodyStream;
 
     @BeforeEach
@@ -130,7 +130,7 @@ public class EditNewsTest {
         Mockito.when(request.getReader()).thenReturn(reader);
 
         Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
-        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(new NewsNotFoundException(idForUpdate));
+        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(new NewsNotFoundServiceException(idForUpdate));
 
         NewsNotFoundWebException expectedException = new NewsNotFoundWebException(idForUpdate);
 
@@ -162,8 +162,8 @@ public class EditNewsTest {
 
         Mockito.when(request.getReader()).thenReturn(reader);
         Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
-        AuthorNotFoundException authorNotFoundException = new AuthorNotFoundException(12);
-        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(authorNotFoundException);
+        AuthorNotFoundServiceException authorNotFoundServiceException = new AuthorNotFoundServiceException(12);
+        Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(authorNotFoundServiceException);
 
         AuthorNotFoundWebException expectedException = new AuthorNotFoundWebException(12);
 
@@ -188,7 +188,7 @@ public class EditNewsTest {
 
         Mockito.when(request.getReader()).thenReturn(reader);
         Mockito.when(request.getPathInfo()).thenReturn(String.valueOf(idForUpdate));
-        DTOValidationException validationException = new DTOValidationException("Validation exceptions");
+        DTOValidationServiceException validationException = new DTOValidationServiceException("Validation exceptions");
         Mockito.when(newsService.update(Mockito.any(), Mockito.any())).thenThrow(validationException);
 
         DataValidationWebException expectedException = new DataValidationWebException(validationException.getMessage());

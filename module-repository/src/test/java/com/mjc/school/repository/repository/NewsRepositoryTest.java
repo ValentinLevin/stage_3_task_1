@@ -9,7 +9,10 @@ import com.mjc.school.repository.model.News;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
@@ -17,13 +20,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("NewsRepository")
+@ExtendWith(MockitoExtension.class)
 class NewsRepositoryTest {
+    @Mock
     private DataSource<News> dataSource;
     private Repository<News> repository;
 
     @BeforeEach
     void setup() {
-        dataSource = Mockito.mock(DataSource.class);
         repository = new NewsRepository(dataSource);
     }
 
@@ -35,8 +39,8 @@ class NewsRepositoryTest {
                         1L,
                         "News 1 name",
                         "News 1 content",
-                        LocalDateTime.of(2024, 04, 12, 9, 57, 01),
-                        LocalDateTime.of(2024, 04, 12, 12, 14, 37),
+                        LocalDateTime.of(2024, 4, 12, 9, 57, 1),
+                        LocalDateTime.of(2024, 4, 12, 12, 14, 37),
                         1L
                 );
         Mockito.when(dataSource.findById(1L)).thenReturn(expectedNews);
@@ -56,13 +60,15 @@ class NewsRepositoryTest {
                         1L,
                         "News 1 name",
                         "News 1 content",
-                        LocalDateTime.of(2024, 04, 12, 9, 57, 01),
-                        LocalDateTime.of(2024, 04, 12, 12, 14, 37),
+                        LocalDateTime.of(2024, 4, 12, 9, 57, 1),
+                        LocalDateTime.of(2024, 4, 12, 12, 14, 37),
                         1L
                 );
         Mockito.doReturn(true).when(dataSource).delete(1L);
 
-        this.repository.delete(newsForDelete);
+        boolean actualDeleteResult = this.repository.delete(newsForDelete);
+
+        assertThat(actualDeleteResult).isTrue();
 
         Mockito.verify(dataSource, Mockito.only()).delete(newsForDelete.getId());
         Mockito.verify(dataSource, Mockito.times(1)).delete(newsForDelete.getId());
@@ -94,7 +100,7 @@ class NewsRepositoryTest {
 
     @Test
     @DisplayName("If the entity field values are incorrect, throw an EntityValidationException")
-    void authorTitleAndContentNotValidated_throwsEntityValidationException() throws CustomRepositoryException {
+    void authorTitleAndContentNotValidated_throwsEntityValidationException() {
         News news = new News(
                 1L,
                 "12",
@@ -103,7 +109,6 @@ class NewsRepositoryTest {
                 null,
                 null
         );
-        Mockito.doReturn(news).when(dataSource).save(news);
         assertThatThrownBy(() -> repository.save(news)).isInstanceOf(EntityValidationException.class);
     }
 }

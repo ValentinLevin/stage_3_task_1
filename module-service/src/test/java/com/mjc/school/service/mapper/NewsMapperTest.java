@@ -1,9 +1,9 @@
 package com.mjc.school.service.mapper;
 
+import com.mjc.school.repository.model.News;
 import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.EditNewsRequestDTO;
 import com.mjc.school.service.dto.NewsDTO;
-import com.mjc.school.repository.model.News;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,8 +21,8 @@ class NewsMapperTest {
                         1L,
                         "News 1 title",
                         "New 1 content",
-                        LocalDateTime.of(2024, 04, 14, 20, 43, 01),
-                        LocalDateTime.of(2024, 05, 13, 21, 03, 31),
+                        LocalDateTime.of(2024, 4, 14, 20, 43, 1),
+                        LocalDateTime.of(2024, 5, 13, 21, 3, 31),
                         2L
                 );
 
@@ -49,7 +49,7 @@ class NewsMapperTest {
                         1L,
                         "News 1 title",
                         "New 1 content",
-                        LocalDateTime.of(2024, 04, 14, 20, 43, 01),
+                        LocalDateTime.of(2024, 4, 14, 20, 43, 1),
                         null,
                         2L
                 );

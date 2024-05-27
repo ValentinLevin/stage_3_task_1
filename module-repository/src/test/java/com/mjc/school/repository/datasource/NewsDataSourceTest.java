@@ -23,20 +23,17 @@ class NewsDataSourceTest {
 
     private Long findRandomId() {
         Random random = new Random(System.currentTimeMillis());
-        return dataSource.findAll().stream()
-                .sorted((item1, item2) -> random.nextInt(3) - 1)
-                .findAny()
-                .map(News::getId)
-                .orElse(null);
+        List<News> news = dataSource.findAll();
+        return news.get(random.nextInt(news.size())).getId();
     }
 
     @Test
     @DisplayName("All news data has been read")
     void readDataFromFile_allDataHasBeenLoaded_firstNewsDataIsEqualsToExpected() {
+        assertThat(readItems).hasSize(25);
+
         List<Long> expectedIdList = new ArrayList<>();
         LongStream.range(1, 26).forEach(expectedIdList::add);
-        assertThat(readItems).hasSameSizeAs(expectedIdList);
-
         assertThat(readItems)
                 .extracting("id")
                 .containsExactlyElementsOf(expectedIdList);
@@ -46,8 +43,8 @@ class NewsDataSourceTest {
                         1L,
                 "News 1 title",
                 "News 1 content",
-                LocalDateTime.of(2024, 04, 05, 14, 12, 31),
-                LocalDateTime.of(2024, 05, 01, 9, 25, 01),
+                LocalDateTime.of(2024, 4, 5, 14, 12, 31),
+                LocalDateTime.of(2024, 5, 1, 9, 25, 1),
                 2L
                 );
 

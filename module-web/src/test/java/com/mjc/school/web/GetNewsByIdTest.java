@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.NewsDTO;
 import com.mjc.school.service.exception.CustomServiceException;
-import com.mjc.school.service.exception.NewsNotFoundException;
+import com.mjc.school.service.exception.NewsNotFoundServiceException;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.constant.ERROR_CODE;
 import com.mjc.school.web.dto.BaseResponseDTO;
@@ -82,7 +82,7 @@ class GetNewsByIdTest {
     @DisplayName("Request news. No news found")
     void notFoundById() throws ServletException, IOException, CustomServiceException {
         Mockito.when(request.getPathInfo()).thenReturn("/1");
-        Mockito.when(newsService.findById(Mockito.anyLong())).thenThrow(NewsNotFoundException.class);
+        Mockito.when(newsService.findById(Mockito.anyLong())).thenThrow(NewsNotFoundServiceException.class);
 
         new NewsItemServlet(newsService).service(request, response);
 

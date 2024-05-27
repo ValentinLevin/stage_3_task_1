@@ -173,6 +173,7 @@ class DataSourceImpl<T extends Entity> implements DataSource<T> {
         this.nextId.set(value);
     }
 
+    @SuppressWarnings("unchecked")
     private T cloneEntity(T entity) {
         try {
             return (T) entity.clone();

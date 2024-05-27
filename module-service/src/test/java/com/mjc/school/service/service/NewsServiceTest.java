@@ -2,34 +2,39 @@ package com.mjc.school.service.service;
 
 import com.mjc.school.repository.exception.CustomRepositoryException;
 import com.mjc.school.repository.exception.EntityNotFoundException;
-import com.mjc.school.repository.exception.KeyNullReferenceException;
 import com.mjc.school.repository.model.Author;
 import com.mjc.school.repository.model.News;
 import com.mjc.school.repository.repository.Repository;
 import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.NewsDTO;
 import com.mjc.school.service.exception.CustomServiceException;
-import com.mjc.school.service.exception.NewsNotFoundException;
+import com.mjc.school.service.exception.NewsNotFoundServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ExtendWith(MockitoExtension.class)
 class NewsServiceTest {
+    @Mock
     private Repository<Author> authorRepository;
+
+    @Mock
     private Repository<News> newsRepository;
+
     private NewsService newsService;
 
     @BeforeEach
     void setUp() {
-        authorRepository = Mockito.mock(Repository.class);
-        newsRepository = Mockito.mock(Repository.class);
         newsService = new NewsServiceImpl(newsRepository, authorRepository);
     }
 
@@ -42,7 +47,7 @@ class NewsServiceTest {
                         1L,
                         "News 1 title",
                         "News 1 content",
-                        LocalDateTime.of(2024, 04, 14, 17, 10, 12),
+                        LocalDateTime.of(2024, 4, 14, 17, 10, 12),
                         null,
                         1L
                 );
@@ -67,14 +72,14 @@ class NewsServiceTest {
 
     @Test
     @DisplayName("If you specify an incorrect news id, a NewsNotFoundException will be thrown")
-    void findById_exists_false() throws KeyNullReferenceException, EntityNotFoundException {
+    void findById_exists_false() throws CustomRepositoryException {
         Mockito.when(newsRepository.findById(1L)).thenThrow(EntityNotFoundException.class);
-        assertThatThrownBy(() -> newsService.findById(1L)).isInstanceOf(NewsNotFoundException.class);
+        assertThatThrownBy(() -> newsService.findById(1L)).isInstanceOf(NewsNotFoundServiceException.class);
     }
 
     @Test
     @DisplayName("The correct ID was sent. Execution without errors")
-    void deleteById_exists() throws CustomServiceException, CustomRepositoryException {
+    void deleteById_exists() throws CustomRepositoryException, CustomServiceException {
         Long idForDelete = 1L;
         boolean expectedDeleteResult = true;
 
@@ -96,6 +101,6 @@ class NewsServiceTest {
     void deleteById_notExists() throws CustomRepositoryException {
         long idForDelete = 1L;
         Mockito.when(newsRepository.deleteById(idForDelete)).thenThrow(EntityNotFoundException.class);
-        assertThatThrownBy(() -> newsService.deleteById(idForDelete)).isInstanceOf(NewsNotFoundException.class);
+        assertThatThrownBy(() -> newsService.deleteById(idForDelete)).isInstanceOf(NewsNotFoundServiceException.class);
     }
 }

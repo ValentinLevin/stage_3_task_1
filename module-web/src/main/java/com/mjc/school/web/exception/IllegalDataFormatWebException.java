@@ -9,14 +9,6 @@ public class IllegalDataFormatWebException extends CustomWebException {
     private static final String MESSAGE_TEMPLATE = "Error in request data format";
     private static final String MESSAGE_TEMPLATE_WITH_DATA = "Error in request data format, received data %s";
 
-    public IllegalDataFormatWebException() {
-        super(
-                ERROR_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
-                MESSAGE_TEMPLATE,
-                HTTP_STATUS
-        );
-    }
-
     public IllegalDataFormatWebException(String data) {
         super(
                 ERROR_CODE.ILLEGAL_REQUEST_DATA_FORMAT,

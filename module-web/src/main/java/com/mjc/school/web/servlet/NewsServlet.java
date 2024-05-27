@@ -62,13 +62,13 @@ public class NewsServlet extends HttpServlet {
 
             try {
                 createdNewsDTO = newsService.add(newsDTO);
-            } catch (NullAuthorIdException e) {
+            } catch (NullAuthorIdServiceException e) {
                 throw new IllegalAuthorIdValueWebException("null");
-            } catch (DTOValidationException e) {
+            } catch (DTOValidationServiceException e) {
                 throw new DataValidationWebException(e.getMessage());
-            } catch (AuthorNotFoundException e) {
+            } catch (AuthorNotFoundServiceException e) {
                 throw new AuthorNotFoundWebException(newsDTO.getAuthorId());
-            } catch (NullNewsIdException | NewsNotFoundException e) {
+            } catch (NullNewsIdServiceException | NewsNotFoundServiceException e) {
                 log.error("An unexpected exception was thrown while adding", e);
                 throw new CustomWebRuntimeException();
             }

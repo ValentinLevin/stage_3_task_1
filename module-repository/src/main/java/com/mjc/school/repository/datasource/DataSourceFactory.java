@@ -9,6 +9,7 @@ public class DataSourceFactory {
 
     private DataSourceFactory() {}
 
+    @SuppressWarnings("unchecked")
     public static <T extends Entity> DataSource<T> getDataSource(Class<T> entityClass) {
         if (entityClass == Author.class) {
             return (DataSource<T>) AuthorDataSource.getInstance();

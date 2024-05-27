@@ -38,15 +38,15 @@ public class NewsItemServlet extends HttpServlet {
             NewsDTO editedNewsDTO;
             try {
                 editedNewsDTO = newsService.update(newsId, newsDTO);
-            } catch (AuthorNotFoundException e) {
+            } catch (AuthorNotFoundServiceException e) {
                 throw new AuthorNotFoundWebException(newsDTO.getAuthorId());
-            } catch (NullNewsIdException e) {
+            } catch (NullNewsIdServiceException e) {
                 throw new IllegalNewsIdValueWebException("null");
-            } catch (NullAuthorIdException e) {
+            } catch (NullAuthorIdServiceException e) {
                 throw new IllegalAuthorIdValueWebException("null");
-            } catch (DTOValidationException e) {
+            } catch (DTOValidationServiceException e) {
                 throw new DataValidationWebException(e.getMessage());
-            } catch (NewsNotFoundException e) {
+            } catch (NewsNotFoundServiceException e) {
                 throw new NewsNotFoundWebException(newsId);
             }
 
@@ -74,12 +74,12 @@ public class NewsItemServlet extends HttpServlet {
             NewsDTO newsDTO;
             try {
                 newsDTO = newsService.findById(newsId);
-            } catch (NullAuthorIdException | AuthorNotFoundException e) {
+            } catch (NullAuthorIdServiceException | AuthorNotFoundServiceException e) {
                 log.error("Unexpected error when requesting news by id {}", newsId, e);
                 throw new IllegalNewsIdValueWebException("null");
-            } catch (NullNewsIdException e) {
+            } catch (NullNewsIdServiceException e) {
                 throw new IllegalNewsIdValueWebException("null");
-            } catch (NewsNotFoundException e) {
+            } catch (NewsNotFoundServiceException e) {
                 throw new NewsNotFoundWebException(newsId);
             }
             GetNewsItemResponseDTO responseBody = new GetNewsItemResponseDTO(newsDTO);
@@ -101,9 +101,9 @@ public class NewsItemServlet extends HttpServlet {
             newsId = HttpServletRequestUtils.getIdFromPath(req);
             try {
                 newsService.deleteById(newsId);
-            } catch (NullNewsIdException e) {
+            } catch (NullNewsIdServiceException e) {
                 throw new IllegalNewsIdValueWebException("null");
-            } catch (NewsNotFoundException e) {
+            } catch (NewsNotFoundServiceException e) {
                 throw new NewsNotFoundWebException(newsId);
             }
             HttpServletResponseUtils.writePayloadIntoResponseBody(resp, new BaseResponseDTO(), SC_OK);

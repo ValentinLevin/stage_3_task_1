@@ -3,11 +3,10 @@ package com.mjc.school.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.service.exception.CustomServiceException;
-import com.mjc.school.service.exception.NewsNotFoundException;
+import com.mjc.school.service.exception.NewsNotFoundServiceException;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.constant.ERROR_CODE;
 import com.mjc.school.web.dto.BaseResponseDTO;
-import com.mjc.school.web.exception.CustomWebException;
 import com.mjc.school.web.exception.IllegalAuthorIdValueWebException;
 import com.mjc.school.web.exception.NewsNotFoundWebException;
 import com.mjc.school.web.servlet.NewsItemServlet;
@@ -63,9 +62,9 @@ class DeleteNewsByIdTest {
 
     @Test
     @DisplayName("Удаление новости. Не найдена новость")
-    void notFoundById() throws ServletException, IOException, CustomWebException, CustomServiceException {
+    void notFoundById() throws ServletException, IOException, CustomServiceException {
         Mockito.when(request.getPathInfo()).thenReturn("/1");
-        Mockito.when(newsService.deleteById(Mockito.anyLong())).thenThrow(NewsNotFoundException.class);
+        Mockito.when(newsService.deleteById(Mockito.anyLong())).thenThrow(NewsNotFoundServiceException.class);
 
         new NewsItemServlet(newsService).service(request, response);
 

@@ -6,29 +6,38 @@ import com.mjc.school.repository.model.Author;
 import com.mjc.school.repository.model.News;
 import com.mjc.school.repository.repository.Repository;
 import com.mjc.school.service.dto.EditNewsRequestDTO;
-import com.mjc.school.service.exception.AuthorNotFoundException;
+import com.mjc.school.service.exception.AuthorNotFoundServiceException;
 import com.mjc.school.service.exception.CustomServiceException;
-import com.mjc.school.service.exception.DTOValidationException;
-import com.mjc.school.service.exception.NewsNotFoundException;
+import com.mjc.school.service.exception.DTOValidationServiceException;
+import com.mjc.school.service.exception.NewsNotFoundServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class NewsServiceUpdateNewsTest {
+    @Mock
     private Repository<Author> authorRepository;
+
+    @Mock
     private Repository<News> newsRepository;
+
     private NewsService newsService;
 
     @BeforeEach
     void setUp() {
-        authorRepository = Mockito.mock(Repository.class);
-        newsRepository = Mockito.mock(Repository.class);
         newsService = new NewsServiceImpl(newsRepository, authorRepository);
     }
 
@@ -125,58 +134,27 @@ class NewsServiceUpdateNewsTest {
         assertThatNoException().isThrownBy(() -> newsService.update(newsIdForChange, requestDTO));
     }
 
-    @Test
-    @DisplayName("If a news title is too short, a DTOValidationException will be thrown when calling the update method.")
-    void update_titleTooShort_throwsDTOValidateException() throws CustomRepositoryException {
-        Long newsIdForUpdate = 1L;
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "12",
-                "News content",
-                2L
+    static Stream<EditNewsRequestDTO> dataForDTOValidateTest() {
+        return Stream.of(
+                new EditNewsRequestDTO("12", "News content", 2L),
+                new EditNewsRequestDTO("", "News content", 2L),
+                new EditNewsRequestDTO("1234567890123456789012345678901", "News content", 2L),
+                new EditNewsRequestDTO("News title", "123", 2L),
+                new EditNewsRequestDTO(
+                        "News title",
+                        "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+ // 100 per line
+                                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+
+                                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                        2L
+                )
         );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(DTOValidationException.class);
     }
 
-    @Test
-    @DisplayName("If the news title is too long, a DTOValidationException will be thrown when calling the update method.")
-    void update_titleTooLong_throwsDTOValidateException() throws CustomRepositoryException {
-        Long newsIdForUpdate = 1L;
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "1234567890123456789012345678901", // 31
-                "News content",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(DTOValidationException.class);
-    }
-
-    @Test
-    @DisplayName("If the news content is too long, a DTOValidationException will be thrown when calling the update method.")
-    void update_contentTooLong_throwsDTOValidateException() throws CustomRepositoryException {
-        Long newsIdForUpdate = 1L;
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+ // 100 per line
-                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+
-                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
-                "News content",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(DTOValidationException.class);
-    }
-
-    @Test
-    @DisplayName("If a news content is too short, a DTOValidationException will be thrown when calling the update method.")
-    void update_contentTooShort_throwsDTOValidateException() throws CustomRepositoryException {
-        Long newsIdForUpdate = 1L;
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "News title",
-                "123",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(DTOValidationException.class);
+    @DisplayName("DTOValidationException will be thrown when calling the update method.")
+    @ParameterizedTest()
+    @MethodSource("dataForDTOValidateTest")
+    void update_titleTooShort_throwsDTOValidateException(EditNewsRequestDTO request) {
+        assertThatThrownBy(() -> newsService.update(1L, request)).isInstanceOf(DTOValidationServiceException.class);
     }
 
     @Test
@@ -189,7 +167,7 @@ class NewsServiceUpdateNewsTest {
                 2L
         );
         Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(false);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(AuthorNotFoundException.class);
+        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(AuthorNotFoundServiceException.class);
     }
 
     @Test
@@ -201,8 +179,7 @@ class NewsServiceUpdateNewsTest {
                 "News content",
                 2L
         );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
         Mockito.when(newsRepository.findById(newsIdForUpdate)).thenThrow(EntityNotFoundException.class);
-        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(NewsNotFoundException.class);
+        assertThatThrownBy(() -> newsService.update(newsIdForUpdate, requestDTO)).isInstanceOf(NewsNotFoundServiceException.class);
     }
 }

@@ -1,54 +1,59 @@
 package com.mjc.school.service.service;
 
-import com.mjc.school.repository.exception.EntityNotFoundException;
-import com.mjc.school.repository.exception.EntityNullReferenceException;
-import com.mjc.school.repository.exception.EntityValidationException;
-import com.mjc.school.repository.exception.KeyNullReferenceException;
-import com.mjc.school.service.dto.EditNewsRequestDTO;
-import com.mjc.school.service.exception.AuthorNotFoundException;
-import com.mjc.school.service.exception.DTOValidationException;
+import com.mjc.school.repository.exception.CustomRepositoryException;
 import com.mjc.school.repository.model.Author;
 import com.mjc.school.repository.model.News;
 import com.mjc.school.repository.repository.Repository;
+import com.mjc.school.service.dto.EditNewsRequestDTO;
+import com.mjc.school.service.exception.AuthorNotFoundServiceException;
+import com.mjc.school.service.exception.DTOValidationServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@ExtendWith(MockitoExtension.class)
 class NewsServiceAddNewsTest {
+    @Mock()
     private Repository<Author> authorRepository;
+
+    @Mock()
     private Repository<News> newsRepository;
+
     private NewsService newsService;
 
     @BeforeEach
     void setUp() {
-        authorRepository = Mockito.mock(Repository.class);
-        newsRepository = Mockito.mock(Repository.class);
         newsService = new NewsServiceImpl(newsRepository, authorRepository);
     }
 
-
     @Test
     @DisplayName("When the added news contains an author who is not in the list of authors, the method will throw an AuthorNotFoundException exception")
-    void add_incorrectData_throwsAuthorNotExistsException() throws KeyNullReferenceException {
+    void add_incorrectData_throwsAuthorNotExistsException() throws CustomRepositoryException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "News title",
                 "News content",
                 2L
         );
         Mockito.when(authorRepository.existsById(2L)).thenReturn(false);
-        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(AuthorNotFoundException.class);
+        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(AuthorNotFoundServiceException.class);
     }
     @Test
     @DisplayName("Cases of correctness of news data. No exception should be thrown")
-    void correctData_noThrownExceptions() throws KeyNullReferenceException, EntityNotFoundException, EntityNullReferenceException, EntityValidationException {
+    void correctData_noThrownExceptions() throws CustomRepositoryException {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "12345",
                 "54321",
@@ -98,77 +103,37 @@ class NewsServiceAddNewsTest {
         assertThatNoException().isThrownBy(() -> newsService.add(requestDTO));
     }
 
-    @Test
-    @DisplayName("If a news title is too short, a DTOValidationException will be thrown when calling the add method.")
-    void add_titleTooShort_throwsDTOValidateException() throws KeyNullReferenceException {
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "12",
-                "News content",
-                2L
+    static Stream<EditNewsRequestDTO> dtoValidationDataSource() {
+        return Stream.of(
+                new EditNewsRequestDTO("12", "News content", 2L),
+                new EditNewsRequestDTO("", "News content", 12L),
+                new EditNewsRequestDTO("1234567890123456789012345678901", "News content", 2L),
+                new EditNewsRequestDTO("News title", "123", 2L),
+                new EditNewsRequestDTO(
+                        "News title",
+                        "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+ // 100 per line
+                                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+
+                                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                        2L
+                )
         );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(DTOValidationException.class);
     }
 
-    @Test
-    @DisplayName("If a news title is empty, a DTOValidationException will be thrown when calling the add method.")
-    void add_emptyTitle_throwsDTOValidateException() throws KeyNullReferenceException {
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "",
-                "News content",
-                12L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(DTOValidationException.class);
-    }
-
-    @Test
-    @DisplayName("If the news title is too long, a DTOValidationException will be thrown when calling the add method.")
-    void add_titleTooLong_throwsDTOValidateException() throws KeyNullReferenceException {
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "1234567890123456789012345678901", // 31
-                "News content",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(DTOValidationException.class);
-    }
-
-    @Test
-    @DisplayName("If the news content is too long, a DTOValidationException will be thrown when calling the add method.")
-    void update_contentTooLong_throwsDTOValidateException() throws KeyNullReferenceException {
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+ // 100 per line
-                        "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"+
-                        "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
-                "News content",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(DTOValidationException.class);
-    }
-
-    @Test
-    @DisplayName("If a news content is too short, a DTOValidationException will be thrown when calling the add method.")
-    void update_contentTooShort_throwsDTOValidateException() throws KeyNullReferenceException {
-        EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
-                "News title",
-                "123",
-                2L
-        );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(true);
-        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(DTOValidationException.class);
+    @ParameterizedTest
+    @MethodSource("dtoValidationDataSource")
+    @DisplayName("DTOValidationException will be thrown when calling the add method.")
+    void add_titleTooShort_throwsDTOValidateException(EditNewsRequestDTO request) {
+        assertThatThrownBy(() -> newsService.add(request)).isInstanceOf(DTOValidationServiceException.class);
     }
 
     @Test
     @DisplayName("When passing an incorrect id for author, an AuthorNotFoundException will be thrown")
-    void add_notFoundNewAuthor_throwsDTOValidateException() throws KeyNullReferenceException {
+    void add_notFoundNewAuthor_throwsDTOValidateException() {
         EditNewsRequestDTO requestDTO = new EditNewsRequestDTO(
                 "News title",
                 "News content",
                 2L
         );
-        Mockito.when(authorRepository.existsById(requestDTO.getAuthorId())).thenReturn(false);
-        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(AuthorNotFoundException.class);
+        assertThatThrownBy(() -> newsService.add(requestDTO)).isInstanceOf(AuthorNotFoundServiceException.class);
     }
 }
