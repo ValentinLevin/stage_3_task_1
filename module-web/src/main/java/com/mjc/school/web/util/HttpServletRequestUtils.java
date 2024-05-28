@@ -18,7 +18,9 @@ public class HttpServletRequestUtils {
 
     private HttpServletRequestUtils() {}
 
-    public static <T> T readObjectFromRequestBody(HttpServletRequest request, Class<T> clazz) throws CustomWebException {
+    public static <T> T readObjectFromRequestBody(
+            HttpServletRequest request, Class<T> clazz
+    ) throws NotUTFEncodingWebException, NoDataInRequestWebException, IllegalDataFormatWebException {
         try {
             request.setCharacterEncoding("UTF-8");
         } catch (UnsupportedEncodingException e) {

@@ -2,7 +2,7 @@ package com.mjc.school.web.mapper;
 
 import com.mjc.school.service.exception.*;
 import com.mjc.school.web.constant.RESULT_CODE;
-import com.mjc.school.web.exception.CustomWebRuntimeException;
+import com.mjc.school.web.exception.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +19,13 @@ public class ResultCodeMapper {
         errorCodes.put(CustomServiceException.class, RESULT_CODE.UNEXPECTED_ERROR);
         errorCodes.put(CustomServiceRuntimeException.class, RESULT_CODE.UNEXPECTED_ERROR);
         errorCodes.put(CustomWebRuntimeException.class, RESULT_CODE.UNEXPECTED_ERROR);
+        errorCodes.put(IllegalLimitValueWebException.class, RESULT_CODE.ILLEGAL_LIMIT_VALUE);
+        errorCodes.put(IllegalOffsetValueWebException.class, RESULT_CODE.ILLEGAL_OFFSET_VALUE);
+        errorCodes.put(IllegalNewsIdValueWebException.class, RESULT_CODE.ILLEGAL_ID_VALUE);
+
+        errorCodes.put(IllegalDataFormatWebException.class, RESULT_CODE.ILLEGAL_DATA_FORMAT);
+        errorCodes.put(NoDataInRequestWebException.class, RESULT_CODE.NO_DATA_IN_REQUEST);
+        errorCodes.put(NotUTFEncodingWebException.class, RESULT_CODE.NOT_UTF_ENCODING);
     }
 
     private ResultCodeMapper() {}

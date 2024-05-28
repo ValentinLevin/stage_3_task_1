@@ -18,6 +18,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -139,12 +140,12 @@ class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public List<NewsDTO> findAll() {
+    public List<NewsDTO> findAll() throws AuthorNotFoundServiceException {
         return this.findAll(0, -1);
     }
 
     @Override
-    public List<NewsDTO> findAll(long offset, long limit) {
+    public List<NewsDTO> findAll(long offset, long limit) throws AuthorNotFoundServiceException {
         Map<Long, Author> authors =
                 this.authorRepository.findAll().stream()
                         .collect(Collectors.toMap(Author::getId, item -> item));
@@ -156,13 +157,17 @@ class NewsServiceImpl implements NewsService {
             news = this.newsRepository.findAll(offset, limit);
         }
 
-        return news.stream()
-                .map(item -> {
-                    NewsDTO newsDTO = NewsMapper.toNewsDTO(item);
-                    newsDTO.setAuthor(AuthorMapper.toAuthorDTO(authors.get(item.getAuthorId())));
-                    return newsDTO;
-                })
-                .toList();
+        List<NewsDTO> newsDTOList = new ArrayList<>();
+        for (News newsItem: news) {
+            Author author = authors.get(newsItem.getAuthorId());
+            if (author == null) {
+                throw new AuthorNotFoundServiceException(newsItem.getAuthorId());
+            }
+            NewsDTO newsDTO = NewsMapper.toNewsDTO(newsItem);
+            newsDTO.setAuthor(AuthorMapper.toAuthorDTO(author));
+            newsDTOList.add(newsDTO);
+        }
+        return newsDTOList;
     }
 
     @Override

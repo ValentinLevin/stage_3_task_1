@@ -2,7 +2,6 @@ package com.mjc.school.web.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.mjc.school.web.exception.CustomWebRuntimeException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +27,7 @@ public class HttpServletResponseUtils {
             }
         } catch (Exception e) {
             log.error("Error when writing the result of request processing in response", e);
-            throw new CustomWebRuntimeException();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }

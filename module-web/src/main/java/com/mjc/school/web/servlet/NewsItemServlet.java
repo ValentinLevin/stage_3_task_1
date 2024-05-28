@@ -42,14 +42,24 @@ public class NewsItemServlet extends HttpServlet {
                     HttpServletRequestUtils.readObjectFromRequestBody(req, EditNewsRequestDTO.class);
             NewsDTO editedNewsDTO = newsService.update(newsId, newsDTO);
             responseBody = new UpdateNewsResponseDTO(editedNewsDTO);
-            resultCode = RESULT_CODE.GET_SUCCESS;
-        } catch (CustomServiceException | CustomServiceRuntimeException | CustomWebException | CustomWebRuntimeException e) {
+            resultCode = RESULT_CODE.SUCCESS;
+        } catch (IllegalNewsIdValueWebException | NotUTFEncodingWebException | NoDataInRequestWebException |
+                 IllegalDataFormatWebException e)
+        {
+            resultCode = ResultCodeMapper.getResultCode(e.getClass());
+            responseBody = new BaseResponseDTO(e);
+
+        } catch (DTOValidationServiceException | NullNewsIdServiceException | NewsNotFoundServiceException |
+                 NullAuthorIdServiceException | AuthorNotFoundServiceException e)
+        {
+
+        } catch (CustomWebRuntimeException e) {
             resultCode = ResultCodeMapper.getResultCode(e.getClass());
             responseBody = new BaseResponseDTO(e);
         } catch (RuntimeException e) {
             log.error("Error when processing a request to change news data with id {}", newsId, e);
-            resultCode = ResultCodeMapper.getResultCode(CustomWebRuntimeException.class);
-            responseBody = new BaseResponseDTO(e);
+            resultCode = RESULT_CODE.UNEXPECTED_ERROR;
+            responseBody = new BaseResponseDTO(resultCode.getErrorCode(), resultCode.getDefaultMessage());
         }
 
         HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, resultCode.getHttpStatus());
