@@ -18,9 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static jakarta.servlet.http.HttpServletResponse.SC_OK;
-
 @WebServlet("/news/*")
 @Slf4j
 public class NewsItemServlet extends HttpServlet {
@@ -37,24 +34,18 @@ public class NewsItemServlet extends HttpServlet {
         RESULT_CODE resultCode;
         try {
             newsId = HttpServletRequestUtils.getIdFromPath(req);
-
-            EditNewsRequestDTO newsDTO =
-                    HttpServletRequestUtils.readObjectFromRequestBody(req, EditNewsRequestDTO.class);
+            EditNewsRequestDTO newsDTO = HttpServletRequestUtils.readObjectFromRequestBody(req, EditNewsRequestDTO.class);
             NewsDTO editedNewsDTO = newsService.update(newsId, newsDTO);
             responseBody = new UpdateNewsResponseDTO(editedNewsDTO);
             resultCode = RESULT_CODE.SUCCESS;
         } catch (IllegalNewsIdValueWebException | NotUTFEncodingWebException | NoDataInRequestWebException |
-                 IllegalDataFormatWebException e)
+                 IllegalDataFormatWebException | DTOValidationServiceException | NullNewsIdServiceException |
+                 NewsNotFoundServiceException | NullAuthorIdServiceException | AuthorNotFoundServiceException e)
         {
             resultCode = ResultCodeMapper.getResultCode(e.getClass());
-            responseBody = new BaseResponseDTO(e);
-
-        } catch (DTOValidationServiceException | NullNewsIdServiceException | NewsNotFoundServiceException |
-                 NullAuthorIdServiceException | AuthorNotFoundServiceException e)
-        {
-
+            responseBody = new BaseResponseDTO(resultCode, e);
         } catch (CustomWebRuntimeException e) {
-            resultCode = ResultCodeMapper.getResultCode(e.getClass());
+            resultCode = e.getResultCode();
             responseBody = new BaseResponseDTO(e);
         } catch (RuntimeException e) {
             log.error("Error when processing a request to change news data with id {}", newsId, e);
@@ -68,52 +59,52 @@ public class NewsItemServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         long newsId = 0;
+        BaseResponseDTO responseBody;
+        RESULT_CODE resultCode;
         try {
             newsId = HttpServletRequestUtils.getIdFromPath(req);
-
-            NewsDTO newsDTO;
-            try {
-                newsDTO = newsService.findById(newsId);
-            } catch (NullAuthorIdServiceException | AuthorNotFoundServiceException e) {
-                log.error("Unexpected error when requesting news by id {}", newsId, e);
-                throw new IllegalNewsIdValueWebException("null");
-            } catch (NullNewsIdServiceException e) {
-                throw new IllegalNewsIdValueWebException("null");
-            } catch (NewsNotFoundServiceException e) {
-                throw new NewsNotFoundWebException(newsId);
-            }
-            GetNewsItemResponseDTO responseBody = new GetNewsItemResponseDTO(newsDTO);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_OK);
-        } catch (CustomWebException e) {
-            BaseResponseDTO responseBody = new BaseResponseDTO(e);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
+            NewsDTO newsDTO = newsService.findById(newsId);
+            responseBody = new GetNewsItemResponseDTO(newsDTO);
+            resultCode = RESULT_CODE.SUCCESS;
+        } catch (NullAuthorIdServiceException | AuthorNotFoundServiceException e) {
+            log.error("Unexpected error when requesting news by id {}", newsId, e);
+            resultCode = RESULT_CODE.UNEXPECTED_ERROR;
+            responseBody =
+                    new BaseResponseDTO(
+                            resultCode.getErrorCode(),
+                            "An unexpected error occurred while processing the request"
+                    );
+        } catch (NullNewsIdServiceException | NewsNotFoundServiceException | IllegalNewsIdValueWebException |
+                 CustomWebRuntimeException e) {
+            resultCode = ResultCodeMapper.getResultCode(e.getClass());
+            responseBody = new BaseResponseDTO(resultCode, e);
         } catch (RuntimeException e) {
             log.error("Error when requesting news by id {}", newsId, e);
-            BaseResponseDTO responseBody = new BaseResponseDTO(e);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
+            resultCode = RESULT_CODE.UNEXPECTED_ERROR;
+            responseBody = new BaseResponseDTO(resultCode.getErrorCode(), resultCode.getDefaultMessage());
         }
+
+        HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, resultCode.getHttpStatus());
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
         long newsId = 0;
+        BaseResponseDTO responseBody;
+        RESULT_CODE resultCode;
         try {
             newsId = HttpServletRequestUtils.getIdFromPath(req);
-            try {
-                newsService.deleteById(newsId);
-            } catch (NullNewsIdServiceException e) {
-                throw new IllegalNewsIdValueWebException("null");
-            } catch (NewsNotFoundServiceException e) {
-                throw new NewsNotFoundWebException(newsId);
-            }
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, new BaseResponseDTO(), SC_OK);
-        } catch (CustomWebException e) {
-            BaseResponseDTO responseBody = new BaseResponseDTO(e);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, e.getHttpStatus());
+            newsService.deleteById(newsId);
+            resultCode = RESULT_CODE.SUCCESS;
+            responseBody = new BaseResponseDTO(resultCode.getErrorCode());
+        } catch (IllegalNewsIdValueWebException | NullNewsIdServiceException | NewsNotFoundServiceException e) {
+            resultCode = ResultCodeMapper.getResultCode(e.getClass());
+            responseBody = new BaseResponseDTO(resultCode, e);
         } catch (RuntimeException e) {
             log.error("Error when deleting news by id {}", newsId, e);
-            BaseResponseDTO responseBody = new BaseResponseDTO(e);
-            HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, SC_INTERNAL_SERVER_ERROR);
+            resultCode = RESULT_CODE.UNEXPECTED_ERROR;
+            responseBody = new BaseResponseDTO(resultCode.getErrorCode(), resultCode.getDefaultMessage());
         }
+        HttpServletResponseUtils.writePayloadIntoResponseBody(resp, responseBody, resultCode.getHttpStatus());
     }
 }

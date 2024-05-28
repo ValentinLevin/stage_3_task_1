@@ -10,7 +10,7 @@ public class NoDataInRequestWebException extends CustomWebException {
 
     public NoDataInRequestWebException() {
         super(
-                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.NO_DATA_IN_REQUEST,
                 MESSAGE_TEMPLATE,
                 HTTP_STATUS
         );

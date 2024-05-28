@@ -25,10 +25,6 @@ public enum RESULT_CODE {
     private final int httpStatus;
     private final String defaultMessage;
 
-    public boolean isSuccess() {
-        return this == SUCCESS;
-    }
-
     RESULT_CODE(int errorCode, int httpStatus) {
         this(errorCode, httpStatus, "");
     }

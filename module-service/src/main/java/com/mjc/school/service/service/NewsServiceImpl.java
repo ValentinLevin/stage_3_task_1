@@ -158,7 +158,7 @@ class NewsServiceImpl implements NewsService {
         }
 
         List<NewsDTO> newsDTOList = new ArrayList<>();
-        for (News newsItem: news) {
+        for (News newsItem : news) {
             Author author = authors.get(newsItem.getAuthorId());
             if (author == null) {
                 throw new AuthorNotFoundServiceException(newsItem.getAuthorId());
@@ -195,8 +195,8 @@ class NewsServiceImpl implements NewsService {
         if (!constraintViolations.isEmpty()) {
             throw new DTOValidationServiceException(
                     constraintViolations.stream()
-                            .map( cv -> cv == null ? "null" : cv.getPropertyPath() + ": " + cv.getMessage() )
-                            .collect( Collectors.joining( ", " ) )
+                            .map(cv -> cv == null ? "null" : cv.getPropertyPath() + ": " + cv.getMessage())
+                            .collect(Collectors.joining(", "))
             );
         }
     }

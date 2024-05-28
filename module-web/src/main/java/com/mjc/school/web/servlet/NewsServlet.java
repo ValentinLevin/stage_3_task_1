@@ -91,7 +91,7 @@ public class NewsServlet extends HttpServlet {
                             resultCode.getErrorCode(),
                             "An unexpected error occurred while processing the request "
                     );
-        } catch (NullNewsIdServiceException | NewsNotFoundServiceException | AuthorNotFoundServiceException e) {
+        } catch (NullNewsIdServiceException | NewsNotFoundServiceException e) {
             log.error("An unexpected exception was thrown while adding", e);
             resultCode = RESULT_CODE.UNEXPECTED_ERROR;
             responseBody =
@@ -100,7 +100,8 @@ public class NewsServlet extends HttpServlet {
                             "An unexpected error occurred while processing the request"
                     );
         } catch (IllegalDataFormatWebException | NoDataInRequestWebException | NotUTFEncodingWebException |
-                 DTOValidationServiceException | NullAuthorIdServiceException | CustomWebRuntimeException e
+                 DTOValidationServiceException | NullAuthorIdServiceException | CustomWebRuntimeException |
+                 AuthorNotFoundServiceException e
         ) {
             resultCode = ResultCodeMapper.getResultCode(e.getClass());
             responseBody = new BaseResponseDTO(resultCode, e);

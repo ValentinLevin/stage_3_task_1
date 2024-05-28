@@ -7,8 +7,8 @@ import com.mjc.school.service.exception.NewsNotFoundServiceException;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.constant.RESULT_CODE;
 import com.mjc.school.web.dto.BaseResponseDTO;
-import com.mjc.school.web.exception.IllegalAuthorIdValueWebException;
-import com.mjc.school.web.exception.NewsNotFoundWebException;
+import com.mjc.school.web.exception.IllegalNewsIdValueWebException;
+import com.mjc.school.web.mapper.ResultCodeMapper;
 import com.mjc.school.web.servlet.NewsItemServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,7 +57,7 @@ class DeleteNewsByIdTest {
         Mockito.verify(response).setStatus(HttpServletResponse.SC_OK);
 
         BaseResponseDTO actualResponse = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
-        assertThat(actualResponse.getErrorCode()).isEqualTo(RESULT_CODE.GET_SUCCESS.getErrorCode());
+        assertThat(actualResponse.getErrorCode()).isEqualTo(RESULT_CODE.SUCCESS.getErrorCode());
     }
 
     @Test
@@ -68,13 +68,14 @@ class DeleteNewsByIdTest {
 
         new NewsItemServlet(newsService).service(request, response);
 
-        NewsNotFoundWebException expectedException = new NewsNotFoundWebException(1L);
+        RESULT_CODE expectedResultCode = ResultCodeMapper.getResultCode(NewsNotFoundServiceException.class);
 
-        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(expectedResultCode).isNotNull();
+        Mockito.verify(response).setStatus(expectedResultCode.getHttpStatus());
 
         assertThat(responseBodyStream.size()).isNotZero();
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedResultCode.getErrorCode());
     }
 
     @Test
@@ -84,12 +85,13 @@ class DeleteNewsByIdTest {
 
         new NewsItemServlet(newsService).service(request, response);
 
-        IllegalAuthorIdValueWebException expectedException = new IllegalAuthorIdValueWebException("1_1");
+        RESULT_CODE expectedResultCode = ResultCodeMapper.getResultCode(IllegalNewsIdValueWebException.class);
 
-        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(expectedResultCode).isNotNull();
+        Mockito.verify(response).setStatus(expectedResultCode.getHttpStatus());
 
         assertThat(responseBodyStream.size()).isNotZero();
         BaseResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), BaseResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedResultCode.getErrorCode());
     }
 }

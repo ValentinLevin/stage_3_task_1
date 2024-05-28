@@ -17,12 +17,10 @@ public class ResultCodeMapper {
         errorCodes.put(NullAuthorIdServiceException.class, RESULT_CODE.DATA_VALIDATION);
         errorCodes.put(NullNewsIdServiceException.class, RESULT_CODE.ILLEGAL_ID_VALUE);
         errorCodes.put(CustomServiceException.class, RESULT_CODE.UNEXPECTED_ERROR);
-        errorCodes.put(CustomServiceRuntimeException.class, RESULT_CODE.UNEXPECTED_ERROR);
         errorCodes.put(CustomWebRuntimeException.class, RESULT_CODE.UNEXPECTED_ERROR);
         errorCodes.put(IllegalLimitValueWebException.class, RESULT_CODE.ILLEGAL_LIMIT_VALUE);
         errorCodes.put(IllegalOffsetValueWebException.class, RESULT_CODE.ILLEGAL_OFFSET_VALUE);
         errorCodes.put(IllegalNewsIdValueWebException.class, RESULT_CODE.ILLEGAL_ID_VALUE);
-
         errorCodes.put(IllegalDataFormatWebException.class, RESULT_CODE.ILLEGAL_DATA_FORMAT);
         errorCodes.put(NoDataInRequestWebException.class, RESULT_CODE.NO_DATA_IN_REQUEST);
         errorCodes.put(NotUTFEncodingWebException.class, RESULT_CODE.NOT_UTF_ENCODING);
@@ -31,10 +29,6 @@ public class ResultCodeMapper {
     private ResultCodeMapper() {}
 
     public static RESULT_CODE getResultCode(Class<?> clazz) {
-        RESULT_CODE resultCode = errorCodes.get(clazz);
-        if (resultCode == null) {
-            resultCode = errorCodes.get(CustomWebRuntimeException.class);
-        }
-        return resultCode;
+        return errorCodes.get(clazz);
     }
 }

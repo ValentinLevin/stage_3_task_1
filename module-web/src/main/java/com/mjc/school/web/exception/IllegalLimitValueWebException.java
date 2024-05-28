@@ -12,7 +12,7 @@ public class IllegalLimitValueWebException extends CustomWebException {
 
     public IllegalLimitValueWebException(String limitValue) {
         super(
-                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.ILLEGAL_LIMIT_VALUE,
                 String.format(INVALID_FORMAT_MESSAGE_TEMPLATE, limitValue),
                 HTTP_STATUS
         );
@@ -20,7 +20,7 @@ public class IllegalLimitValueWebException extends CustomWebException {
 
     public IllegalLimitValueWebException(Integer limitValue) {
         super(
-                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.ILLEGAL_LIMIT_VALUE,
                 String.format(INVALID_VALUE_MESSAGE_TEMPLATE, limitValue),
                 HTTP_STATUS
         );

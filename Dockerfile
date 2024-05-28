@@ -11,7 +11,7 @@ COPY ./module-service ./module-service
 COPY ./module-web ./module-web
 COPY ./module-main ./module-main
 
-RUN ./gradlew clean build
+RUN ./gradlew build
 
 FROM bellsoft/liberica-openjre-alpine-musl:17-cds
 WORKDIR app

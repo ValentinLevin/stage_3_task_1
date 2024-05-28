@@ -12,7 +12,7 @@ public class IllegalOffsetValueWebException extends CustomWebException {
 
     public IllegalOffsetValueWebException(String offsetValue) {
         super(
-                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.ILLEGAL_OFFSET_VALUE,
                 String.format(INVALID_FORMAT_MESSAGE_TEMPLATE, offsetValue),
                 HTTP_STATUS
         );
@@ -20,7 +20,7 @@ public class IllegalOffsetValueWebException extends CustomWebException {
 
     public IllegalOffsetValueWebException(long offsetValue) {
         super(
-                RESULT_CODE.ILLEGAL_REQUEST_DATA_FORMAT,
+                RESULT_CODE.ILLEGAL_OFFSET_VALUE,
                 String.format(INVALID_VALUE_MESSAGE_TEMPLATE, offsetValue),
                 HTTP_STATUS
         );

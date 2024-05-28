@@ -16,7 +16,7 @@ public class CustomWebRuntimeException extends RuntimeException {
         return HTTP_STATUS;
     }
 
-    public RESULT_CODE getErrorCode() {
+    public RESULT_CODE getResultCode() {
         return RESULT_CODE.UNEXPECTED_ERROR;
     }
 }

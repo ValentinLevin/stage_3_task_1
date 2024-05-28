@@ -2,14 +2,16 @@ package com.mjc.school.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mjc.school.web.exception.CustomWebException;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.mjc.school.web.constant.RESULT_CODE;
+import com.mjc.school.web.exception.CustomWebRuntimeException;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"errorCode", "errorMessage"})
 public class BaseResponseDTO {
     @JsonProperty("errorCode")
     private final int errorCode;
@@ -39,17 +41,10 @@ public class BaseResponseDTO {
         );
     }
 
-    public BaseResponseDTO(CustomWebException exception) {
+    public BaseResponseDTO(CustomWebRuntimeException exception) {
         this(
-                exception.getErrorCode().getErrorCode(),
+                exception.getResultCode().getErrorCode(),
                 exception.getMessage()
-        );
-    }
-
-    public BaseResponseDTO(Throwable throwable) {
-        this(
-                RESULT_CODE.UNEXPECTED_ERROR.getErrorCode(),
-                throwable.getMessage()
         );
     }
 

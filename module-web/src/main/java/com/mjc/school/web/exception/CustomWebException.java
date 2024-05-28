@@ -6,11 +6,11 @@ import lombok.Getter;
 @Getter
 public class CustomWebException extends Exception {
     private final int httpStatus;
-    private final RESULT_CODE errorCode;
+    private final RESULT_CODE resultCode;
 
-    public CustomWebException(RESULT_CODE errorCode, String message, int httpStatus) {
+    public CustomWebException(RESULT_CODE resultCode, String message, int httpStatus) {
         super(message);
         this.httpStatus = httpStatus;
-        this.errorCode = errorCode;
+        this.resultCode = resultCode;
     }
 }

@@ -9,10 +9,10 @@ import com.mjc.school.service.exception.AuthorNotFoundServiceException;
 import com.mjc.school.service.exception.CustomServiceException;
 import com.mjc.school.service.exception.DTOValidationServiceException;
 import com.mjc.school.service.service.NewsService;
+import com.mjc.school.web.constant.RESULT_CODE;
 import com.mjc.school.web.dto.AddNewsResponseDTO;
-import com.mjc.school.web.exception.AuthorNotFoundWebException;
-import com.mjc.school.web.exception.DataValidationWebException;
 import com.mjc.school.web.exception.NoDataInRequestWebException;
+import com.mjc.school.web.mapper.ResultCodeMapper;
 import com.mjc.school.web.servlet.NewsServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -119,7 +119,7 @@ class AddNewNewsTest {
         NoDataInRequestWebException expectedException = new NoDataInRequestWebException();
 
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getResultCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 
@@ -139,14 +139,15 @@ class AddNewNewsTest {
 
         Mockito.when(newsService.add(Mockito.any())).thenThrow(new DTOValidationServiceException(requestBody));
 
-        DataValidationWebException expectedException = new DataValidationWebException(requestBody);
+        RESULT_CODE expectedResultCode = ResultCodeMapper.getResultCode(DTOValidationServiceException.class);
 
         new NewsServlet(newsService).service(request, response);
 
-        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(expectedResultCode).isNotNull();
+        Mockito.verify(response).setStatus(expectedResultCode.getHttpStatus());
 
         AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedResultCode.getErrorCode());
     }
 
     @Test
@@ -158,14 +159,15 @@ class AddNewNewsTest {
 
         Mockito.when(newsService.add(Mockito.any())).thenThrow(DTOValidationServiceException.class);
 
-        DataValidationWebException expectedException = new DataValidationWebException("");
+        RESULT_CODE expectedResultCode = ResultCodeMapper.getResultCode(DTOValidationServiceException.class);
 
         new NewsServlet(newsService).service(request, response);
 
-        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(expectedResultCode).isNotNull();
+        Mockito.verify(response).setStatus(expectedResultCode.getHttpStatus());
 
         AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedResultCode.getErrorCode());
     }
 
     @Test
@@ -176,7 +178,7 @@ class AddNewNewsTest {
                         "\"title\" : \"News title\", " +
                         "\"content\": \"News content\", " +
                         "\"authorId\": 0" +
-                        "}";
+                "}";
 
         StringReader reader = new StringReader(requestBody);
         BufferedReader bufferedReader = new BufferedReader(reader);
@@ -184,13 +186,14 @@ class AddNewNewsTest {
 
         Mockito.when(newsService.add(Mockito.any())).thenThrow(AuthorNotFoundServiceException.class);
 
-        AuthorNotFoundWebException expectedException = new AuthorNotFoundWebException(0);
+        RESULT_CODE expectedResultCode = ResultCodeMapper.getResultCode(AuthorNotFoundServiceException.class);
 
         new NewsServlet(newsService).service(request, response);
 
-        Mockito.verify(response).setStatus(expectedException.getHttpStatus());
+        assertThat(expectedResultCode).isNotNull();
+        Mockito.verify(response).setStatus(expectedResultCode.getHttpStatus());
 
         AddNewsResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), AddNewsResponseDTO.class);
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedResultCode.getErrorCode());
     }
 }

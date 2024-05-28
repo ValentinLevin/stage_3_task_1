@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.mjc.school.service.dto.AuthorDTO;
 import com.mjc.school.service.dto.NewsDTO;
+import com.mjc.school.service.exception.CustomServiceException;
 import com.mjc.school.service.service.NewsService;
 import com.mjc.school.web.dto.GetNewsListResponseDTO;
 import com.mjc.school.web.exception.IllegalLimitValueWebException;
@@ -62,7 +63,7 @@ class ReadNewsListTest {
     );
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() throws IOException, CustomServiceException {
         newsService = Mockito.mock(NewsService.class);
         request = Mockito.mock(HttpServletRequest.class);
         response = Mockito.mock(HttpServletResponse.class);
@@ -92,12 +93,12 @@ class ReadNewsListTest {
         GetNewsListResponseDTO expectedResponseBody = new GetNewsListResponseDTO(news, 1, news.size(), 10L);
         GetNewsListResponseDTO actualResponseBody = mapper.readValue(responseBodyStream.toByteArray(), GetNewsListResponseDTO.class);
 
-        assertThat(actualResponseBody).isEqualTo(expectedResponseBody);
+        assertThat(actualResponseBody).usingRecursiveComparison().isEqualTo(expectedResponseBody);
     }
 
     @Test
     @DisplayName("Getting a list of news. limit and offset are passed to the service")
-    void testLimitAndOffset() throws ServletException, IOException {
+    void testLimitAndOffset() throws ServletException, IOException, CustomServiceException {
         int limit = news.size();
         int offset = 1;
         Mockito.when(request.getParameter("limit")).thenReturn(String.valueOf(limit));
@@ -129,7 +130,7 @@ class ReadNewsListTest {
 
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getResultCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 
@@ -148,7 +149,7 @@ class ReadNewsListTest {
 
         Mockito.verify(response).setStatus(expectedException.getHttpStatus());
 
-        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getErrorCode().getErrorCode());
+        assertThat(actualResponseBody.getErrorCode()).isEqualTo(expectedException.getResultCode().getErrorCode());
         assertThat(actualResponseBody.getErrorMessage()).isEqualTo(expectedException.getMessage());
     }
 }

@@ -1,5 +1,7 @@
 package com.mjc.school.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.mjc.school.service.dto.NewsDTO;
 import lombok.*;
 
@@ -11,34 +13,17 @@ import java.util.Objects;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonPropertyOrder({"errorCode", "errorMessage", "items", "start", "size", "totalItemCount"})
 public class GetNewsListResponseDTO extends BaseResponseDTO {
+    @JsonProperty("items")
     private List<NewsDTO> items;
+
+    @JsonProperty("start")
     private long start;
+
+    @JsonProperty("size")
     private long size;
+
+    @JsonProperty("totalItemCount")
     private long totalItemCount;
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(items, start, size, totalItemCount);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj == this) {
-            return true;
-        }
-
-        if (!(obj instanceof GetNewsListResponseDTO o)) {
-            return false;
-        }
-
-        return Objects.equals(start, o.start)
-                && Objects.equals(size, o.size)
-                && Objects.equals(totalItemCount, o.totalItemCount)
-                && Objects.equals(items, o.items);
-    }
 }
